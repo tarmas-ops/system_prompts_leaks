@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd grupo-nv && npm install",
+  "buildCommand": "cd grupo-nv && npm run build",
+  "outputDirectory": "grupo-nv/out"
+}
