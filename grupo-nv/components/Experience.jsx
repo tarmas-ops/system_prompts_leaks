@@ -1,6 +1,8 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { SoftShadows } from "@react-three/drei";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
@@ -102,14 +104,21 @@ export default function Experience() {
       <Canvas
         shadows
         camera={{ fov: 50, near: 0.1, far: 2000, position: KEYFRAMES[0].pos }}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
+        gl={{
+          antialias: true,
+          powerPreference: "high-performance",
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.08,
+        }}
         dpr={[1, 1.8]}
       >
         <color attach="background" args={["#061629"]} />
-        <fog attach="fog" args={["#061629", 90, 360]} />
-        <ambientLight intensity={0.35} />
+        <fog attach="fog" args={["#061629", 100, 380]} />
+        <SoftShadows size={22} samples={8} focus={0.7} />
+        <ambientLight intensity={0.4} />
         <SunLight />
-        <hemisphereLight args={["#2a4670", "#0b2343", 0.5]} />
+        <directionalLight position={[-30, 22, -12]} intensity={0.45} color="#5e7bb0" />
+        <hemisphereLight args={["#33507e", "#1a130c", 0.55]} />
 
         <Particles />
         <Terrain />
@@ -117,6 +126,11 @@ export default function Experience() {
         <Bodeflex />
 
         <Rig />
+
+        <EffectComposer disableNormalPass>
+          <Bloom intensity={0.8} luminanceThreshold={0.5} luminanceSmoothing={0.25} mipmapBlur />
+          <Vignette offset={0.25} darkness={0.72} />
+        </EffectComposer>
       </Canvas>
     </div>
   );
