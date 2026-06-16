@@ -33,57 +33,57 @@ function Chapter({ index, eyebrow, children }) {
   );
 }
 
-/* Business line — brand logo, render (optional) and its characteristics. */
-function BusinessLine({ index, logo, badge, subtitle, name, image, description, features, nda }) {
+/* Business line — logo, bold title, the render (clear of any text), features. */
+function BusinessLine({ index, logo, subtitle, name, image, description, features, nda }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
 
   return (
-    <section ref={ref} className="chapter proj" id={`ch-${index}`}>
-      {image && (
-        <motion.div className="proj-bg" style={{ y }}>
-          <motion.img
-            // eslint-disable-next-line @next/next/no-img-element
-            src={image}
-            alt=""
-            initial={{ opacity: 0, scale: 1.16, filter: "blur(12px)", clipPath: "inset(100% 0% 0% 0%)" }}
-            whileInView={{ opacity: 1, scale: 1.04, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)" }}
-            viewport={{ margin: "-14% 0px" }}
-            transition={{ duration: 1.7, ease: [0.16, 1, 0.3, 1] }}
-          />
-          <div className="proj-scrim" />
-        </motion.div>
-      )}
-
-      <div className="proj-content" data-center={image ? undefined : "true"}>
-        <div className="proj-top">
-          <Reveal>
-            <span className={`logo-chip ${badge ? "badge" : ""}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logo} alt={name} />
-            </span>
-          </Reveal>
-          <Reveal className="eyebrow">{`${String(index + 1).padStart(2, "0")} — ${subtitle}`}</Reveal>
-          <Headline lines={[name]} style={{ fontSize: "clamp(2.1rem,4.6vw,3.6rem)" }} />
-        </div>
-        <div className="proj-bottom">
+    <section ref={ref} className="chapter line" id={`ch-${index}`}>
+      <div className="line-inner">
+        <Reveal>
+          <span className="line-logo-box">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="line-logo" src={logo} alt={name} />
+          </span>
+        </Reveal>
+        <Reveal className="eyebrow">{`${String(index + 1).padStart(2, "0")} — ${subtitle}`}</Reveal>
+        <Headline lines={[name]} style={{ fontSize: "clamp(2.1rem,4.6vw,3.6rem)" }} />
+        {description && (
           <Reveal className="lede" delay={0.05}>
             {description}
           </Reveal>
-          {nda && (
-            <Reveal delay={0.1}>
-              <span className="nda">En negociación · NDA</span>
+        )}
+
+        {image && (
+          <motion.div className="line-render-wrap" style={{ y }}>
+            <motion.img
+              className="line-render"
+              // eslint-disable-next-line @next/next/no-img-element
+              src={image}
+              alt=""
+              initial={{ opacity: 0, scale: 1.1, filter: "blur(12px)", clipPath: "inset(100% 0% 0% 0%)" }}
+              whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)" }}
+              viewport={{ margin: "-12% 0px" }}
+              transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </motion.div>
+        )}
+
+        {nda && (
+          <Reveal delay={0.1}>
+            <span className="nda">En negociación · NDA</span>
+          </Reveal>
+        )}
+
+        <div className="feature-grid">
+          {features.map((f, i) => (
+            <Reveal key={f} className="glass feature" delay={i * 0.06}>
+              <span className="fdot" />
+              <span className="ftext">{f}</span>
             </Reveal>
-          )}
-          <div className="feature-grid">
-            {features.map((f, i) => (
-              <Reveal key={f} className="glass feature" delay={i * 0.06}>
-                <span className="fdot" />
-                <span className="ftext">{f}</span>
-              </Reveal>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </section>
@@ -183,14 +183,14 @@ export default function Story() {
           </Reveal>
           <div className="lines-grid">
             {[
-              { logo: "/lines/casanuba.png", badge: true, name: "Hotelería & Lifestyle", desc: "Activos turísticos boutique en destinos exclusivos." },
+              { logo: "/lines/casanuba.png", name: "Hotelería & Lifestyle", desc: "Activos turísticos boutique en destinos exclusivos." },
               { logo: "/lines/bodeflex.png", name: "Industrial & Flex Storage", desc: "Parques de bodegaje flexible en ubicaciones estratégicas." },
               { logo: "/lines/value.png", name: "Opportunistic Real Estate", desc: "Oportunidades off-market con alto potencial de valor." },
             ].map((l, i) => (
               <Reveal className="line-item" key={l.logo} delay={i * 0.1}>
-                <span className={`logo-chip ${l.badge ? "badge" : ""}`}>
+                <span className="line-logo-box">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={l.logo} alt={l.name} />
+                  <img className="line-logo" src={l.logo} alt={l.name} />
                 </span>
                 <span className="line-name">{l.name}</span>
                 <span className="line-desc">{l.desc}</span>
@@ -203,7 +203,6 @@ export default function Story() {
         <BusinessLine
           index={3}
           logo="/lines/casanuba.png"
-          badge
           subtitle="Open Light Hospitality"
           name="Casa Nuba."
           image="/projects/casa-nuba-cut.png"

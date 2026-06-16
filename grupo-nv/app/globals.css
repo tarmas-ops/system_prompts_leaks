@@ -504,48 +504,51 @@ h3 {
   object-fit: contain;
 }
 
-/* ---------- Project chapters (render as a floating, background-free model) -- */
-.proj {
-  overflow: hidden;
-  display: block;
-  padding: 0;
+/* ---------- Business-line sections (stacked: nothing overlaps the render) -- */
+.line {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(80px, 12vh, 130px) clamp(24px, 6vw, 90px);
 }
-.proj-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.line-inner {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.3rem;
+}
+.line-render-wrap {
+  width: 100%;
   display: grid;
   place-items: center;
+  margin: 0.6rem 0;
   will-change: transform;
 }
-.proj-bg img {
-  width: min(99%, 1640px);
-  height: 94%;
+.line-render {
+  width: min(96%, 1280px);
+  max-height: 56vh;
   object-fit: contain;
-  object-position: center;
   display: block;
   will-change: transform, opacity, clip-path, filter;
+  filter: drop-shadow(0 40px 70px rgba(0, 0, 0, 0.55));
 }
 
-/* ---------- Business-line logo chips ---------- */
-.logo-chip {
-  display: inline-flex;
-  background: var(--white);
-  border-radius: 16px;
-  padding: 14px 24px;
-  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.75);
+/* ---------- Business-line logos (transparent, uniform height) ---------- */
+.line-logo-box {
+  height: clamp(72px, 10vw, 104px);
+  display: grid;
+  place-items: center;
 }
-.logo-chip img {
-  height: clamp(40px, 6vw, 60px);
+.line-logo {
+  max-height: 100%;
+  max-width: min(80vw, 360px);
   width: auto;
   display: block;
-}
-.logo-chip.badge {
-  border-radius: 50%;
-  padding: 10px;
-}
-.logo-chip.badge img {
-  height: clamp(64px, 9vw, 96px);
 }
 
 .lines-grid {
@@ -609,48 +612,8 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
-.proj-scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 22, 41, 0.72) 0%,
-    rgba(6, 22, 41, 0) 26%,
-    rgba(6, 22, 41, 0) 68%,
-    rgba(6, 22, 41, 0.88) 100%
-  );
-}
-.proj-content {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  padding: clamp(72px, 12vh, 130px) clamp(24px, 6vw, 110px);
-}
-.proj-content[data-center="true"] {
-  justify-content: center;
-  gap: 1.8rem;
-}
-.proj-top,
-.proj-bottom {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.logo-chip + .eyebrow {
-  margin-top: 1.4rem;
-}
-.proj .headline,
-.proj .lede,
-.proj .loc,
-.proj .eyebrow {
-  text-shadow: 0 2px 30px rgba(6, 22, 41, 0.95);
+.line-logo + .eyebrow {
+  margin-top: 0.6rem;
 }
 
 /* ---------- Location + status pills ---------- */
