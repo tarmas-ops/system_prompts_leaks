@@ -502,39 +502,57 @@ h3 {
   object-fit: contain;
 }
 
-/* ---------- Project chapters (full-bleed cinematic render) ---------- */
+/* ---------- Project chapters (render as a floating, background-free model) -- */
 .proj {
   overflow: hidden;
+  display: block;
+  padding: 0;
 }
 .proj-bg {
   position: absolute;
-  inset: -8% 0;
+  inset: 0;
   z-index: 0;
+  display: grid;
+  place-items: center;
   will-change: transform;
 }
 .proj-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: min(96%, 1200px);
+  height: 78%;
+  object-fit: contain;
+  object-position: center;
   display: block;
   will-change: transform, opacity;
 }
 .proj-scrim {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(120% 80% at 50% 40%, transparent 30%, rgba(6, 22, 41, 0.55) 100%),
-    linear-gradient(
-      180deg,
-      rgba(6, 22, 41, 0.78) 0%,
-      rgba(6, 22, 41, 0.28) 32%,
-      rgba(6, 22, 41, 0.45) 64%,
-      rgba(6, 22, 41, 0.92) 100%
-    );
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 22, 41, 0.72) 0%,
+    rgba(6, 22, 41, 0) 26%,
+    rgba(6, 22, 41, 0) 68%,
+    rgba(6, 22, 41, 0.88) 100%
+  );
 }
-.proj .stage {
+.proj-content {
   position: relative;
   z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: clamp(72px, 12vh, 130px) clamp(24px, 6vw, 110px);
+}
+.proj-top,
+.proj-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .proj .headline,
 .proj .lede,
