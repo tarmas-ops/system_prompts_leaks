@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useJourney } from "@/lib/store";
 
@@ -12,126 +11,150 @@ function ss(e0, e1, x) {
 }
 
 /**
- * The real project render, shattered into a grid of 3D tiles that fly in from
- * depth — rotating and scattered — and assemble, piece by piece, into the
- * complete photographic render as the chapter is scrolled. The final state IS
- * the render (full design fidelity); the journey there is a true 3D build.
- *
- * The whole grid is locked to the camera and sized to "contain" the image in
- * view, so framing is always perfect regardless of the cinematic camera path.
+ * A stylized architectural-massing "construction site". As the chapter scrolls:
+ *   1. the terrain/site platform settles in, then
+ *   2. the units build up, piece by piece — walls grow up out of the ground,
+ *      roofs and details drop into place — staggered like a real development.
+ * Premium massing aesthetic (materials, warm light, shadows), not a photo.
  */
-function ImageAssembly({ url, win, cols = 9, rows = 5, dist = 22 }) {
-  const baseTex = useTexture(url);
-  const { camera, size } = useThree();
+function ConstructionSite({ data, win }) {
   const group = useRef();
-  const meshRefs = useRef([]);
-  const fwd = useMemo(() => new THREE.Vector3(), []);
+  const groundRef = useRef();
+  const refs = useRef([]);
+  const { ground, pieces } = data;
 
-  const { tiles, materials } = useMemo(() => {
-    baseTex.colorSpace = THREE.SRGBColorSpace;
-    const tiles = [];
-    const materials = [];
-    let i = 0;
-    const rnd = (seed) => {
-      const x = Math.sin(seed) * 43758.5453;
-      return x - Math.floor(x);
-    };
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const tex = baseTex.clone();
-        tex.needsUpdate = true;
-        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-        tex.repeat.set(1 / cols, 1 / rows);
-        tex.offset.set(c / cols, 1 - (r + 1) / rows);
-        materials.push(
-          new THREE.MeshBasicMaterial({
-            map: tex,
-            transparent: true,
-            opacity: 0,
-            toneMapped: false,
-            side: THREE.DoubleSide,
-          })
-        );
-        const k = i + 1;
-        tiles.push({
-          cx: (c + 0.5) / cols,
-          cy: (r + 0.5) / rows,
-          order: ((r / rows + c / cols) / 2) * 0.7 + rnd(k * 12.9) * 0.3,
-          ox: (rnd(k * 1.3) - 0.5) * 2.0,
-          oy: (rnd(k * 7.7) - 0.5) * 2.0,
-          oz: 5 + rnd(k * 3.1) * 16,
-          rx: (rnd(k * 2.1) - 0.5) * 2.6,
-          ry: (rnd(k * 5.2) - 0.5) * 2.6,
-          rz: (rnd(k * 9.4) - 0.5) * 2.6,
-        });
-        i++;
-      }
-    }
-    return { tiles, materials };
-  }, [baseTex, cols, rows]);
-
-  useFrame(() => {
+  useFrame((state) => {
     if (!group.current) return;
     const p = useJourney.getState().progress;
     const [w0, w1] = win;
-    const build = ss(w0, w0 + (w1 - w0) * 0.72, p); // assemble across the window
-    const vis = 1 - ss(w1, w1 + 0.05, p); // fade out just after
+    const active = p > w0 - 0.06 && p < w1 + 0.14;
+    group.current.visible = active;
+    if (!active) return;
 
-    // Lock the grid in front of the camera, facing it.
-    fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
-    group.current.position.copy(camera.position).addScaledVector(fwd, dist);
-    group.current.quaternion.copy(camera.quaternion);
+    const span = w1 - w0;
+    const build = ss(w0, w1, p);
+    const out = 1 - ss(w1, w1 + 0.07, p);
 
-    // Contain the image within the current view at `dist`.
-    const vH = 2 * dist * Math.tan(((camera.fov || 50) * Math.PI) / 360);
-    const vW = vH * (size.width / size.height);
-    const imgA = baseTex.image ? baseTex.image.width / baseTex.image.height : 1.6;
-    let planeW, planeH;
-    if (vW / vH < imgA) {
-      planeW = vW * 0.92;
-      planeH = planeW / imgA;
-    } else {
-      planeH = vH * 0.84;
-      planeW = planeH * imgA;
+    // Phase 1 — terrain/site settles first.
+    const g = ss(w0, w0 + span * 0.16, p);
+    if (groundRef.current) {
+      groundRef.current.material.opacity = g * out * 0.96;
+      groundRef.current.scale.set(g, 1, g);
     }
-    const tw = planeW / cols;
-    const th = planeH / rows;
-    const stagger = 0.7;
 
-    for (let i = 0; i < tiles.length; i++) {
-      const m = meshRefs.current[i];
+    // Phase 2 — units build up after the ground.
+    const unitBuild = ss(w0 + span * 0.12, w1, p);
+    const stagger = 0.8;
+    const n = pieces.length;
+    for (let i = 0; i < n; i++) {
+      const m = refs.current[i];
       if (!m) continue;
-      const t = tiles[i];
-      const lp = THREE.MathUtils.clamp(build * (1 + stagger) - t.order * stagger, 0, 1);
-      const e = 1 - Math.pow(1 - lp, 3);
-      const fx = (t.cx - 0.5) * planeW;
-      const fy = (0.5 - t.cy) * planeH;
-      m.position.set(
-        fx + (1 - e) * t.ox * planeW * 0.5,
-        fy + (1 - e) * t.oy * planeH * 0.5,
-        (1 - e) * t.oz
-      );
-      m.rotation.set((1 - e) * t.rx, (1 - e) * t.ry, (1 - e) * t.rz);
-      m.scale.set(tw, th, 1);
-      materials[i].opacity = e * vis;
+      const pc = pieces[i];
+      const t = THREE.MathUtils.clamp(unitBuild * (1 + stagger) - (pc.order / n) * stagger, 0, 1);
+      const e = 1 - Math.pow(1 - t, 3);
+      const [sx, sy, sz] = pc.size;
+      if (pc.kind === "base") {
+        // Walls grow upward out of the ground (anchored at their base).
+        m.scale.set(sx, Math.max(0.0001, sy * e), sz);
+        m.position.set(pc.pos[0], pc.pos[1] - sy / 2 + (sy * e) / 2, pc.pos[2]);
+      } else {
+        // Roofs / glass / details settle down into place.
+        m.scale.set(sx, sy, sz);
+        m.position.set(pc.pos[0], pc.pos[1] + (1 - e) * 2.2, pc.pos[2]);
+      }
+      m.material.opacity = e * out;
     }
+
+    // Slow showcase orbit so the massing reads as three-dimensional.
+    group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.16 * build * out;
   });
 
   return (
-    <group ref={group}>
-      {tiles.map((t, i) => (
-        <mesh key={i} ref={(el) => (meshRefs.current[i] = el)} material={materials[i]}>
-          <planeGeometry args={[1, 1]} />
+    <group ref={group} visible={false}>
+      <mesh ref={groundRef} position={[0, -0.5, 0]} receiveShadow>
+        <boxGeometry args={ground.size} />
+        <meshStandardMaterial
+          color={ground.color}
+          roughness={0.95}
+          metalness={0.05}
+          transparent
+          opacity={0}
+        />
+      </mesh>
+      {pieces.map((pc, i) => (
+        <mesh key={i} ref={(el) => (refs.current[i] = el)} castShadow receiveShadow>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial
+            color={pc.color}
+            emissive={pc.emissive || "#000000"}
+            emissiveIntensity={pc.ei || 0}
+            metalness={pc.metal ?? 0.2}
+            roughness={pc.rough ?? 0.65}
+            transparent
+            opacity={0}
+          />
         </mesh>
       ))}
     </group>
   );
 }
 
+/* Casa Nuba — boutique villas, a common bar, glowing pool and warm path lights. */
 export function CasaNuba() {
-  return <ImageAssembly url="/projects/casa-nuba.png" win={[0.3, 0.45]} dist={22} />;
+  const data = useMemo(() => {
+    const ground = { size: [30, 1, 24], color: "#2f2820" };
+    const pieces = [];
+    let order = 0;
+    const push = (pc) => pieces.push({ order: order++, ...pc });
+
+    // Common / restaurant building (left)
+    push({ pos: [-9, 1.7, -4], size: [5, 3.4, 13], color: "#5b4a37", kind: "base", rough: 0.6 });
+    push({ pos: [-9, 1.7, -4], size: [5.05, 1.4, 13.05], color: "#0e0c09", emissive: "#ffb066", ei: 0.8, kind: "glass" });
+    push({ pos: [-9, 3.6, -4], size: [5.5, 0.5, 13.6], color: "#17140f", kind: "roof" });
+
+    // Villas — 2 rows × 5
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 5; c++) {
+        const x = -2.5 + c * 3.4;
+        const z = -5 + r * 5;
+        push({ pos: [x, 1.2, z], size: [2.7, 2.3, 3.6], color: "#8a6f52", kind: "base", rough: 0.55 });
+        push({ pos: [x, 1.0, z + 1.85], size: [2.0, 1.1, 0.18], color: "#0e0c09", emissive: "#ffb066", ei: 1.1, kind: "glass" });
+        push({ pos: [x, 2.65, z], size: [3.1, 0.5, 4.0], color: "#17140f", kind: "roof" });
+      }
+    }
+
+    // Pool + deck (front)
+    push({ pos: [-3, 0.55, 6], size: [7, 0.3, 3.6], color: "#5b4a37", kind: "deck" });
+    push({ pos: [-3, 0.72, 6], size: [4.2, 0.3, 2], color: "#0b3b4a", emissive: "#1f9fc4", ei: 1.5, kind: "pool" });
+
+    // Warm path lights
+    for (let i = 0; i < 12; i++) {
+      const x = -3 + (i % 6) * 2.9;
+      const z = i < 6 ? -1.8 : 2.6;
+      push({ pos: [x, 0.5, z], size: [0.22, 0.7, 0.22], color: "#1a140e", emissive: "#ffcf95", ei: 1.8, kind: "light" });
+    }
+    return { ground, pieces };
+  }, []);
+
+  return <ConstructionSite data={data} win={[0.3, 0.45]} />;
 }
 
+/* Bodeflex — flexible warehouse modules with dark metal, roofs and orange doors. */
 export function Bodeflex() {
-  return <ImageAssembly url="/projects/bodeflex-hero.png" win={[0.48, 0.63]} dist={26} />;
+  const data = useMemo(() => {
+    const ground = { size: [30, 1, 20], color: "#26262a" };
+    const pieces = [];
+    let order = 0;
+    const push = (pc) => pieces.push({ order: order++, ...pc });
+
+    for (let i = 0; i < 6; i++) {
+      const x = -9 + i * 3.6;
+      push({ pos: [x, 1.9, 0], size: [3.2, 3.8, 9.5], color: "#2c2c2e", kind: "base", metal: 0.55, rough: 0.4 });
+      push({ pos: [x, 3.95, 0], size: [3.5, 0.4, 10], color: "#19191b", kind: "roof", metal: 0.55 });
+      push({ pos: [x, 1.2, 4.9], size: [2.1, 2.3, 0.25], color: "#120f0c", emissive: "#e8731f", ei: 1.3, kind: "door" });
+    }
+    return { ground, pieces };
+  }, []);
+
+  return <ConstructionSite data={data} win={[0.48, 0.63]} />;
 }
