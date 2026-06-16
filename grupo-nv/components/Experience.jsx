@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useEffect, Suspense } from "react";
+import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
 import Terrain from "@/components/three/Terrain";
@@ -13,12 +13,12 @@ import { CasaNuba, Bodeflex } from "@/components/three/ProjectBuild";
 const KEYFRAMES = [
   { pos: [0, 58, 125], look: [0, 0, 0] }, // 01 Manifesto — high, distant
   { pos: [0, 34, 95], look: [0, 4, 0] }, // 02 Thesis — settle toward site
-  { pos: [-28, 16, 52], look: [0, 9, 0] }, // 03 Lifecycle — descend into the build
-  { pos: [38, 10, 30], look: [0, 11, -8] }, // 04 Casa Nuba — low, intimate
-  { pos: [-52, 14, 6], look: [-6, 7, -28] }, // 05 Bodeflex — fly the corridor
-  { pos: [26, 9, 44], look: [-8, 6, 0] }, // 06 +Value — street level
-  { pos: [0, 70, 120], look: [0, 6, 0] }, // 07 Leadership — calm, pulled back
-  { pos: [0, 138, 64], look: [0, 0, -18] }, // 08 Close — rise to sunrise
+  { pos: [-26, 26, 60], look: [0, 4, 0] }, // 03 Lifecycle — descend to the site
+  { pos: [22, 17, 44], look: [0, 3, 0] }, // 04 Casa Nuba — 3/4 aerial of the build
+  { pos: [-24, 16, 42], look: [0, 3, 0] }, // 05 Bodeflex — 3/4 aerial of the build
+  { pos: [26, 12, 46], look: [0, 4, 0] }, // 06 +Value — street level
+  { pos: [0, 80, 120], look: [0, 6, 0] }, // 07 Leadership — calm, pulled back
+  { pos: [0, 150, 70], look: [0, 0, -18] }, // 08 Close — rise to sunrise
 ];
 
 function Rig() {
@@ -73,9 +73,24 @@ function SunLight() {
       new THREE.Color("#f0c08a"),
       Math.sin(p * Math.PI)
     );
-    light.current.position.set(60, 40 + p * 60, -80 + p * 120);
+    light.current.position.set(34, 40 + p * 40, 28);
   });
-  return <directionalLight ref={light} intensity={1.6} castShadow />;
+  return (
+    <directionalLight
+      ref={light}
+      intensity={1.9}
+      castShadow
+      shadow-mapSize-width={1024}
+      shadow-mapSize-height={1024}
+      shadow-camera-near={1}
+      shadow-camera-far={140}
+      shadow-camera-left={-30}
+      shadow-camera-right={30}
+      shadow-camera-top={30}
+      shadow-camera-bottom={-30}
+      shadow-bias={-0.0004}
+    />
+  );
 }
 
 export default function Experience() {
@@ -85,6 +100,7 @@ export default function Experience() {
   return (
     <div className="scene-canvas">
       <Canvas
+        shadows
         camera={{ fov: 50, near: 0.1, far: 2000, position: KEYFRAMES[0].pos }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 1.8]}
@@ -97,10 +113,8 @@ export default function Experience() {
 
         <Particles />
         <Terrain />
-        <Suspense fallback={null}>
-          <CasaNuba />
-          <Bodeflex />
-        </Suspense>
+        <CasaNuba />
+        <Bodeflex />
 
         <Rig />
       </Canvas>
