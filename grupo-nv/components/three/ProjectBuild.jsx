@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useJourney } from "@/lib/store";
 
@@ -11,95 +12,126 @@ function ss(e0, e1, x) {
 }
 
 /**
- * A cluster of box "pieces" that assembles itself, piece by piece, as the
- * journey scrolls through its window. Each piece rises from below and scales
- * into place with a staggered delay, so the project literally builds in front
- * of the visitor — concept → structure → completion.
+ * The real project render, shattered into a grid of 3D tiles that fly in from
+ * depth — rotating and scattered — and assemble, piece by piece, into the
+ * complete photographic render as the chapter is scrolled. The final state IS
+ * the render (full design fidelity); the journey there is a true 3D build.
+ *
+ * The whole grid is locked to the camera and sized to "contain" the image in
+ * view, so framing is always perfect regardless of the cinematic camera path.
  */
-function Cluster({ pieces, position, win }) {
-  const refs = useRef([]);
+function ImageAssembly({ url, win, cols = 9, rows = 5, dist = 22 }) {
+  const baseTex = useTexture(url);
+  const { camera, size } = useThree();
   const group = useRef();
-  const [w0, w1] = win;
+  const meshRefs = useRef([]);
+  const fwd = useMemo(() => new THREE.Vector3(), []);
 
-  useFrame((state) => {
-    const p = useJourney.getState().progress;
-    const build = ss(w0, w1, p);
-    const stagger = 0.65;
-    const n = pieces.length;
-
-    for (let i = 0; i < n; i++) {
-      const m = refs.current[i];
-      if (!m) continue;
-      const pc = pieces[i];
-      const t = THREE.MathUtils.clamp(build * (1 + stagger) - (i / n) * stagger, 0, 1);
-      const e = 1 - Math.pow(1 - t, 3);
-      m.position.set(pc.pos[0], pc.pos[1] - (1 - e) * 16, pc.pos[2]);
-      const s = Math.max(0.0001, e);
-      m.scale.set(pc.size[0] * s, pc.size[1] * s, pc.size[2] * s);
-      m.material.opacity = e;
+  const { tiles, materials } = useMemo(() => {
+    baseTex.colorSpace = THREE.SRGBColorSpace;
+    const tiles = [];
+    const materials = [];
+    let i = 0;
+    const rnd = (seed) => {
+      const x = Math.sin(seed) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const tex = baseTex.clone();
+        tex.needsUpdate = true;
+        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.repeat.set(1 / cols, 1 / rows);
+        tex.offset.set(c / cols, 1 - (r + 1) / rows);
+        materials.push(
+          new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            opacity: 0,
+            toneMapped: false,
+            side: THREE.DoubleSide,
+          })
+        );
+        const k = i + 1;
+        tiles.push({
+          cx: (c + 0.5) / cols,
+          cy: (r + 0.5) / rows,
+          order: ((r / rows + c / cols) / 2) * 0.7 + rnd(k * 12.9) * 0.3,
+          ox: (rnd(k * 1.3) - 0.5) * 2.0,
+          oy: (rnd(k * 7.7) - 0.5) * 2.0,
+          oz: 5 + rnd(k * 3.1) * 16,
+          rx: (rnd(k * 2.1) - 0.5) * 2.6,
+          ry: (rnd(k * 5.2) - 0.5) * 2.6,
+          rz: (rnd(k * 9.4) - 0.5) * 2.6,
+        });
+        i++;
+      }
     }
-    // Slow showcase rotation so the massing reads as three-dimensional.
-    if (group.current) {
-      const vis = build * (1 - ss(w1 + 0.08, w1 + 0.18, p));
-      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.12) * 0.12 * vis;
+    return { tiles, materials };
+  }, [baseTex, cols, rows]);
+
+  useFrame(() => {
+    if (!group.current) return;
+    const p = useJourney.getState().progress;
+    const [w0, w1] = win;
+    const build = ss(w0, w0 + (w1 - w0) * 0.72, p); // assemble across the window
+    const vis = 1 - ss(w1, w1 + 0.05, p); // fade out just after
+
+    // Lock the grid in front of the camera, facing it.
+    fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
+    group.current.position.copy(camera.position).addScaledVector(fwd, dist);
+    group.current.quaternion.copy(camera.quaternion);
+
+    // Contain the image within the current view at `dist`.
+    const vH = 2 * dist * Math.tan(((camera.fov || 50) * Math.PI) / 360);
+    const vW = vH * (size.width / size.height);
+    const imgA = baseTex.image ? baseTex.image.width / baseTex.image.height : 1.6;
+    let planeW, planeH;
+    if (vW / vH < imgA) {
+      planeW = vW * 0.92;
+      planeH = planeW / imgA;
+    } else {
+      planeH = vH * 0.84;
+      planeW = planeH * imgA;
+    }
+    const tw = planeW / cols;
+    const th = planeH / rows;
+    const stagger = 0.7;
+
+    for (let i = 0; i < tiles.length; i++) {
+      const m = meshRefs.current[i];
+      if (!m) continue;
+      const t = tiles[i];
+      const lp = THREE.MathUtils.clamp(build * (1 + stagger) - t.order * stagger, 0, 1);
+      const e = 1 - Math.pow(1 - lp, 3);
+      const fx = (t.cx - 0.5) * planeW;
+      const fy = (0.5 - t.cy) * planeH;
+      m.position.set(
+        fx + (1 - e) * t.ox * planeW * 0.5,
+        fy + (1 - e) * t.oy * planeH * 0.5,
+        (1 - e) * t.oz
+      );
+      m.rotation.set((1 - e) * t.rx, (1 - e) * t.ry, (1 - e) * t.rz);
+      m.scale.set(tw, th, 1);
+      materials[i].opacity = e * vis;
     }
   });
 
   return (
-    <group ref={group} position={position}>
-      {pieces.map((pc, i) => (
-        <mesh key={i} ref={(el) => (refs.current[i] = el)}>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshStandardMaterial
-            color={pc.color}
-            emissive={pc.emissive || "#000000"}
-            emissiveIntensity={pc.ei || 0}
-            metalness={pc.metal ?? 0.35}
-            roughness={pc.rough ?? 0.55}
-            transparent
-            opacity={0}
-          />
+    <group ref={group}>
+      {tiles.map((t, i) => (
+        <mesh key={i} ref={(el) => (meshRefs.current[i] = el)} material={materials[i]}>
+          <planeGeometry args={[1, 1]} />
         </mesh>
       ))}
     </group>
   );
 }
 
-/* Casa Nuba — boutique villas, dark roofs, a glowing pool and a common bar. */
 export function CasaNuba() {
-  const pieces = useMemo(() => {
-    const out = [];
-    // Common / restaurant building
-    out.push({ pos: [-13, 1.7, -13], size: [20, 3.4, 6], color: "#4f4030" });
-    out.push({ pos: [-13, 3.7, -13], size: [20.6, 0.5, 6.6], color: "#16120d" });
-    // Villas grid (2 rows × 6) — base + dark roof
-    for (let r = 0; r < 2; r++) {
-      for (let c = 0; c < 6; c++) {
-        const x = -13 + c * 5.2;
-        const z = -3 + r * 5.6;
-        out.push({ pos: [x, 1.2, z], size: [3.2, 2.4, 3.8], color: "#7a6650" });
-        out.push({ pos: [x, 2.7, z], size: [3.7, 0.55, 4.2], color: "#16120d" });
-      }
-    }
-    // Pool deck + glowing water
-    out.push({ pos: [-2, 0.1, 6], size: [11, 0.25, 6], color: "#5b4a3a" });
-    out.push({ pos: [-2, 0.3, 6], size: [7, 0.35, 3.4], color: "#0b3b4a", emissive: "#1f9fc4", ei: 1.5 });
-    return out;
-  }, []);
-  return <Cluster pieces={pieces} position={[0, 0, -8]} win={[0.31, 0.45]} />;
+  return <ImageAssembly url="/projects/casa-nuba.png" win={[0.3, 0.45]} dist={22} />;
 }
 
-/* Bodeflex — a row of warehouse modules with dark roofs and orange doors. */
 export function Bodeflex() {
-  const pieces = useMemo(() => {
-    const out = [];
-    for (let i = 0; i < 8; i++) {
-      const x = -21 + i * 6;
-      out.push({ pos: [x, 1.9, 0], size: [5, 3.8, 9], color: "#2c2c2e", metal: 0.6, rough: 0.4 });
-      out.push({ pos: [x, 4.0, 0], size: [5.3, 0.4, 9.4], color: "#1a1a1c", metal: 0.6 });
-      out.push({ pos: [x, 1.3, 4.8], size: [3, 2.4, 0.3], color: "#120f0c", emissive: "#e8731f", ei: 1.2 });
-    }
-    return out;
-  }, []);
-  return <Cluster pieces={pieces} position={[-6, 0, -28]} win={[0.46, 0.6]} />;
+  return <ImageAssembly url="/projects/bodeflex-hero.png" win={[0.48, 0.63]} dist={26} />;
 }

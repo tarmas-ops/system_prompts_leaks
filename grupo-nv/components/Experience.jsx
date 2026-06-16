@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
 import Terrain from "@/components/three/Terrain";
@@ -97,8 +97,10 @@ export default function Experience() {
 
         <Particles />
         <Terrain />
-        <CasaNuba />
-        <Bodeflex />
+        <Suspense fallback={null}>
+          <CasaNuba />
+          <Bodeflex />
+        </Suspense>
 
         <Rig />
       </Canvas>
