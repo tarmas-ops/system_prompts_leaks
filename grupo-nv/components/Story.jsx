@@ -42,8 +42,7 @@ function Project({ index, eyebrow, image, title, location, lede, kpis }) {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const y = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.12, 1.04, 1.12]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
 
   return (
     <section ref={ref} className="chapter proj" id={`ch-${index}`}>
@@ -52,11 +51,20 @@ function Project({ index, eyebrow, image, title, location, lede, kpis }) {
           // eslint-disable-next-line @next/next/no-img-element
           src={image}
           alt=""
-          style={{ scale }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ margin: "-12% 0px" }}
-          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{
+            opacity: 0,
+            scale: 1.16,
+            filter: "blur(12px)",
+            clipPath: "inset(100% 0% 0% 0%)",
+          }}
+          whileInView={{
+            opacity: 1,
+            scale: 1.04,
+            filter: "blur(0px)",
+            clipPath: "inset(0% 0% 0% 0%)",
+          }}
+          viewport={{ margin: "-14% 0px" }}
+          transition={{ duration: 1.7, ease: [0.16, 1, 0.3, 1] }}
         />
         <div className="proj-scrim" />
       </motion.div>
