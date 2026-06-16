@@ -463,7 +463,8 @@ h3 {
   .dash {
     grid-template-columns: 1fr;
   }
-  .rail {
+  .rail,
+  .brand {
     display: none;
   }
   .stats {
