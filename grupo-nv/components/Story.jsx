@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useJourney, SECTIONS } from "@/lib/store";
-import KpiCard from "@/components/KpiCard";
 import { Monogram, LogoLockup } from "@/components/Logo";
 import { Reveal, Counter } from "@/components/Motion";
 
@@ -19,9 +18,9 @@ function Headline({ lines, style }) {
   );
 }
 
-function Chapter({ index, eyebrow, className = "", children }) {
+function Chapter({ index, eyebrow, children }) {
   return (
-    <section className={`chapter ${className}`} data-align="center" id={`ch-${index}`}>
+    <section className="chapter" data-align="center" id={`ch-${index}`}>
       <div className="stage">
         {eyebrow && (
           <Reveal className="eyebrow">
@@ -34,56 +33,55 @@ function Chapter({ index, eyebrow, className = "", children }) {
   );
 }
 
-/* Project chapter — the render as a background-removed model floating in the
-   3D scene, framed by headline (top) and KPIs (bottom). Subtle parallax + zoom. */
-function Project({ index, eyebrow, image, title, location, lede, kpis }) {
+/* Business line — brand logo, render (optional) and its characteristics. */
+function BusinessLine({ index, logo, badge, subtitle, name, image, description, features, nda }) {
   const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
 
   return (
     <section ref={ref} className="chapter proj" id={`ch-${index}`}>
-      <motion.div className="proj-bg" style={{ y }}>
-        <motion.img
-          // eslint-disable-next-line @next/next/no-img-element
-          src={image}
-          alt=""
-          initial={{
-            opacity: 0,
-            scale: 1.16,
-            filter: "blur(12px)",
-            clipPath: "inset(100% 0% 0% 0%)",
-          }}
-          whileInView={{
-            opacity: 1,
-            scale: 1.04,
-            filter: "blur(0px)",
-            clipPath: "inset(0% 0% 0% 0%)",
-          }}
-          viewport={{ margin: "-14% 0px" }}
-          transition={{ duration: 1.7, ease: [0.16, 1, 0.3, 1] }}
-        />
-        <div className="proj-scrim" />
-      </motion.div>
+      {image && (
+        <motion.div className="proj-bg" style={{ y }}>
+          <motion.img
+            // eslint-disable-next-line @next/next/no-img-element
+            src={image}
+            alt=""
+            initial={{ opacity: 0, scale: 1.16, filter: "blur(12px)", clipPath: "inset(100% 0% 0% 0%)" }}
+            whileInView={{ opacity: 1, scale: 1.04, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)" }}
+            viewport={{ margin: "-14% 0px" }}
+            transition={{ duration: 1.7, ease: [0.16, 1, 0.3, 1] }}
+          />
+          <div className="proj-scrim" />
+        </motion.div>
+      )}
 
-      <div className="proj-content">
+      <div className="proj-content" data-center={image ? undefined : "true"}>
         <div className="proj-top">
-          <Reveal className="eyebrow">
-            {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
+          <Reveal>
+            <span className={`logo-chip ${badge ? "badge" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logo} alt={name} />
+            </span>
           </Reveal>
-          <Headline lines={title} style={{ fontSize: "clamp(2.2rem,5vw,4rem)" }} />
-          {location && <Reveal className="loc">◐ {location}</Reveal>}
+          <Reveal className="eyebrow">{`${String(index + 1).padStart(2, "0")} — ${subtitle}`}</Reveal>
+          <Headline lines={[name]} style={{ fontSize: "clamp(2.1rem,4.6vw,3.6rem)" }} />
         </div>
         <div className="proj-bottom">
           <Reveal className="lede" delay={0.05}>
-            {lede}
+            {description}
           </Reveal>
-          <div className="kpi-grid">
-            {kpis.map((k, i) => (
-              <KpiCard key={k.label} {...k} index={i} />
+          {nda && (
+            <Reveal delay={0.1}>
+              <span className="nda">En negociación · NDA</span>
+            </Reveal>
+          )}
+          <div className="feature-grid">
+            {features.map((f, i) => (
+              <Reveal key={f} className="glass feature" delay={i * 0.06}>
+                <span className="fdot" />
+                <span className="ftext">{f}</span>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -150,7 +148,7 @@ export default function Story() {
           </Reveal>
         </Chapter>
 
-        {/* 02 — TESIS + TRACK RECORD REAL */}
+        {/* 02 — TESIS + EXPERIENCIA (resumen) */}
         <Chapter index={1} eyebrow="La Disciplina">
           <Headline lines={["Construimos plataformas", "inmobiliarias de largo plazo."]} />
           <Reveal className="pillars" delay={0.1}>
@@ -158,93 +156,82 @@ export default function Story() {
           </Reveal>
           <div className="stats">
             <Reveal className="stat">
-              <div className="n">
-                +<Counter value={150} />
-              </div>
+              <div className="n">+<Counter value={150} /></div>
               <div className="k">Proyectos desarrollados</div>
             </Reveal>
             <Reveal className="stat" delay={0.08}>
-              <div className="n">
-                +<Counter value={1.5} decimals={1} />M
-              </div>
+              <div className="n">+<Counter value={1.5} decimals={1} />M</div>
               <div className="k">m² construidos</div>
             </Reveal>
             <Reveal className="stat" delay={0.16}>
-              <div className="n">
-                +US$<Counter value={3} />B
-              </div>
+              <div className="n">+US$<Counter value={3} />B</div>
               <div className="k">Inversión gestionada</div>
             </Reveal>
             <Reveal className="stat" delay={0.24}>
-              <div className="n">
-                +<Counter value={60} />
-              </div>
+              <div className="n">+<Counter value={60} /></div>
               <div className="k">Años de experiencia</div>
             </Reveal>
           </div>
         </Chapter>
 
-        {/* 03 — CÓMO CREAMOS VALOR */}
-        <Chapter index={2} eyebrow="Cómo creamos valor">
-          <Headline lines={["De la tierra", "al hito."]} />
-          <Reveal className="lede" delay={0.05}>
-            Un proceso disciplinado para transformar oportunidades en activos
-            generadores de valor — construido en tiempo real mientras navegas.
+        {/* 03 — LÍNEAS DE NEGOCIO (pilares) */}
+        <Chapter index={2} eyebrow="Líneas de negocio">
+          <Headline lines={["Tres plataformas.", "Una filosofía."]} />
+          <Reveal className="lede" delay={0.06}>
+            Tres líneas complementarias bajo una misma disciplina de inversión de
+            largo plazo.
           </Reveal>
-          <Reveal className="pillars" delay={0.12} style={{ fontSize: "clamp(0.85rem,1.6vw,1.2rem)" }}>
-            Originación <span>·</span> Underwriting <span>·</span> Estructuración{" "}
-            <span>·</span> Desarrollo <span>·</span> Operación <span>·</span> Monetización
-          </Reveal>
+          <div className="lines-grid">
+            {[
+              { logo: "/lines/casanuba.png", badge: true, name: "Hotelería & Lifestyle", desc: "Activos turísticos boutique en destinos exclusivos." },
+              { logo: "/lines/bodeflex.png", name: "Industrial & Flex Storage", desc: "Parques de bodegaje flexible en ubicaciones estratégicas." },
+              { logo: "/lines/value.png", name: "Opportunistic Real Estate", desc: "Oportunidades off-market con alto potencial de valor." },
+            ].map((l, i) => (
+              <Reveal className="line-item" key={l.logo} delay={i * 0.1}>
+                <span className={`logo-chip ${l.badge ? "badge" : ""}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={l.logo} alt={l.name} />
+                </span>
+                <span className="line-name">{l.name}</span>
+                <span className="line-desc">{l.desc}</span>
+              </Reveal>
+            ))}
+          </div>
         </Chapter>
 
         {/* 04 — CASA NUBA */}
-        <Project
+        <BusinessLine
           index={3}
-          eyebrow="Casa Nuba · Hotelería"
+          logo="/lines/casanuba.png"
+          badge
+          subtitle="Open Light Hospitality"
+          name="Casa Nuba."
           image="/projects/casa-nuba-cut.png"
-          title={["Casa Nuba."]}
-          location="Punta Lobos, Pichilemu"
-          lede="Desarrollo turístico boutique Open Light: 18 unidades, inversión de $1.900 MM, orientado a flujos recurrentes y sostenibles en el largo plazo."
-          kpis={[
-            { label: "TIR Apalancada", value: 39.4, suffix: "%", decimals: 1 },
-            { label: "NOI Año 1", value: 229, prefix: "$", suffix: " MM" },
-            { label: "DSCR mínimo", value: 2.81, suffix: "x", decimals: 2 },
-            { label: "Ocupación Año 1", value: 55, suffix: "%" },
-          ]}
+          description="Desarrollo y operación de activos turísticos orientados a experiencias premium en destinos exclusivos."
+          features={["Experiencias únicas", "Arquitectura de alto nivel", "Sostenibilidad y entorno"]}
         />
 
         {/* 05 — BODEFLEX */}
-        <Project
+        <BusinessLine
           index={4}
-          eyebrow="Bodeflex Valle Grande · Industrial"
+          logo="/lines/bodeflex.png"
+          subtitle="Industrial & Flex Storage"
+          name="Bodeflex Valle Grande."
           image="/projects/bodeflex-cut.png"
-          title={["Bodeflex", "Valle Grande."]}
-          location="Valle Grande, Lampa"
-          lede="Bodegaje flexible institucional: 22.080 m² arrendables, unidades modulares desde 200 m², 6–8 m de altura libre y seguridad 24/7."
-          kpis={[
-            { label: "TIR Apalancada", value: 25, suffix: "%" },
-            { label: "NOI Año 1", value: 40200, suffix: " UF" },
-            { label: "DSCR mínimo", value: 1.9, suffix: "x", decimals: 1 },
-            { label: "Ocupación estab.", value: 95, suffix: "%" },
-          ]}
+          description="Desarrollo y operación de parques de bodegaje flexible para pymes y empresas en ubicaciones estratégicas."
+          features={["Bodegas flexibles", "Oficina integrada", "Seguridad y control 24/7"]}
         />
 
         {/* 06 — +VALUE */}
-        <Chapter index={5} eyebrow="+Value · Oportunístico">
-          <Headline lines={["Valor donde", "otros ven desgaste."]} />
-          <Reveal className="glass mini" delay={0.1}>
-            <div>
-              <strong style={{ fontWeight: 500, letterSpacing: "0.06em" }}>
-                Strip center · Región Metropolitana
-              </strong>
-              <p className="lede" style={{ marginTop: "0.6rem" }}>
-                Adquisición value-add: optimización de rentas, reposicionamiento
-                comercial y mejoras físicas selectivas para hacer crecer el NOI.
-              </p>
-            </div>
-            <span className="nda">En negociación · NDA</span>
-          </Reveal>
-        </Chapter>
+        <BusinessLine
+          index={5}
+          logo="/lines/value.png"
+          subtitle="Opportunistic Real Estate"
+          name="+Value."
+          description="Adquisición y estructuración de oportunidades inmobiliarias fuera de mercado con alto potencial de creación de valor."
+          features={["Originación off-market", "Creación de valor", "Red selecta de inversores"]}
+          nda
+        />
 
         {/* 07 — LIDERAZGO & CONSEJO ASESOR */}
         <Chapter index={6} eyebrow="Liderazgo & Consejo Asesor">

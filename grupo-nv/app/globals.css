@@ -45,8 +45,8 @@ h1,
 h2,
 h3 {
   font-family: var(--font-jost), Georgia, serif;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 0.98;
 }
 
@@ -116,8 +116,9 @@ h3 {
 
 .eyebrow {
   font-family: var(--font-jost);
-  font-size: 0.74rem;
-  letter-spacing: 0.42em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.38em;
   text-transform: uppercase;
   color: var(--taupe);
   margin-bottom: 1.6rem;
@@ -125,6 +126,7 @@ h3 {
 
 .headline {
   font-size: clamp(2.4rem, 7vw, 6.4rem);
+  font-weight: 700;
   max-width: none;
   text-wrap: balance;
 }
@@ -517,12 +519,95 @@ h3 {
   will-change: transform;
 }
 .proj-bg img {
-  width: min(98%, 1480px);
-  height: 88%;
+  width: min(99%, 1640px);
+  height: 94%;
   object-fit: contain;
   object-position: center;
   display: block;
   will-change: transform, opacity, clip-path, filter;
+}
+
+/* ---------- Business-line logo chips ---------- */
+.logo-chip {
+  display: inline-flex;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 14px 24px;
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.75);
+}
+.logo-chip img {
+  height: clamp(40px, 6vw, 60px);
+  width: auto;
+  display: block;
+}
+.logo-chip.badge {
+  border-radius: 50%;
+  padding: 10px;
+}
+.logo-chip.badge img {
+  height: clamp(64px, 9vw, 96px);
+}
+
+.lines-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 4vw, 44px);
+  margin-top: 2.8rem;
+  width: 100%;
+  max-width: 1000px;
+}
+.line-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.line-item .line-name {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.line-item .line-desc {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--gray-arch);
+}
+
+/* ---------- Feature cards (business-line characteristics) ---------- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 860px;
+  margin: 2rem auto 0;
+}
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px 22px;
+  text-align: left;
+}
+.feature .fdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--taupe);
+  flex: 0 0 auto;
+}
+.feature .ftext {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 760px) {
+  .lines-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .proj-scrim {
   position: absolute;
@@ -547,12 +632,19 @@ h3 {
   text-align: center;
   padding: clamp(72px, 12vh, 130px) clamp(24px, 6vw, 110px);
 }
+.proj-content[data-center="true"] {
+  justify-content: center;
+  gap: 1.8rem;
+}
 .proj-top,
 .proj-bottom {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.logo-chip + .eyebrow {
+  margin-top: 1.4rem;
 }
 .proj .headline,
 .proj .lede,

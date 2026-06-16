@@ -4,7 +4,7 @@ import { Jost } from "next/font/google";
 // Geometric sans matching the Grupo NV logo lettering — used across the page.
 const jost = Jost({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-jost",
   display: "swap",
 });
