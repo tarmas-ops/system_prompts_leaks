@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
 import Terrain from "@/components/three/Terrain";
 import Particles from "@/components/three/Particles";
-import City from "@/components/three/City";
+import { CasaNuba, Bodeflex } from "@/components/three/ProjectBuild";
 
 // One camera keyframe per chapter: where the lens sits + what it looks at.
 // This is the cinematic spine — the camera "travels" the ecosystem on scroll.
@@ -97,7 +97,8 @@ export default function Experience() {
 
         <Particles />
         <Terrain />
-        <City />
+        <CasaNuba />
+        <Bodeflex />
 
         <Rig />
       </Canvas>
