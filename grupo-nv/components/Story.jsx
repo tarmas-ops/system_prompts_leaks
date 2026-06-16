@@ -34,7 +34,7 @@ function Chapter({ index, eyebrow, children }) {
 }
 
 /* Business line — logo, bold title, the render (clear of any text), features. */
-function BusinessLine({ index, logo, subtitle, name, image, description, features, nda }) {
+function BusinessLine({ index, logo, whiteLogo, subtitle, name, image, description, features, nda }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
@@ -45,7 +45,7 @@ function BusinessLine({ index, logo, subtitle, name, image, description, feature
         <Reveal>
           <span className="line-logo-box">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="line-logo" src={logo} alt={name} />
+            <img className={`line-logo ${whiteLogo ? "on-white" : ""}`} src={logo} alt={name} />
           </span>
         </Reveal>
         <Reveal className="eyebrow">{`${String(index + 1).padStart(2, "0")} — ${subtitle}`}</Reveal>
@@ -183,17 +183,16 @@ export default function Story() {
           </Reveal>
           <div className="lines-grid">
             {[
-              { logo: "/lines/casanuba.png", name: "Hotelería & Lifestyle", desc: "Activos turísticos boutique en destinos exclusivos." },
-              { logo: "/lines/bodeflex.png", name: "Industrial & Flex Storage", desc: "Parques de bodegaje flexible en ubicaciones estratégicas." },
-              { logo: "/lines/value.png", name: "Opportunistic Real Estate", desc: "Oportunidades off-market con alto potencial de valor." },
+              { logo: "/lines/casanuba.png", name: "Hotelería & Lifestyle" },
+              { logo: "/lines/bodeflex.png", name: "Industrial & Flex Storage" },
+              { logo: "/lines/value-white.png", name: "Opportunistic Real Estate", white: true },
             ].map((l, i) => (
               <Reveal className="line-item" key={l.logo} delay={i * 0.1}>
                 <span className="line-logo-box">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="line-logo" src={l.logo} alt={l.name} />
+                  <img className={`line-logo ${l.white ? "on-white" : ""}`} src={l.logo} alt={l.name} />
                 </span>
                 <span className="line-name">{l.name}</span>
-                <span className="line-desc">{l.desc}</span>
               </Reveal>
             ))}
           </div>
@@ -224,7 +223,8 @@ export default function Story() {
         {/* 06 — +VALUE */}
         <BusinessLine
           index={5}
-          logo="/lines/value.png"
+          logo="/lines/value-white.png"
+          whiteLogo
           subtitle="Opportunistic Real Estate"
           name="+Value."
           description="Adquisición y estructuración de oportunidades inmobiliarias fuera de mercado con alto potencial de creación de valor."
