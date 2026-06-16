@@ -502,15 +502,45 @@ h3 {
   object-fit: contain;
 }
 
-/* ---------- Project chapters (text over the 3D render background) ---------- */
+/* ---------- Project chapters (full-bleed cinematic render) ---------- */
+.proj {
+  overflow: hidden;
+}
+.proj-bg {
+  position: absolute;
+  inset: -8% 0;
+  z-index: 0;
+  will-change: transform;
+}
+.proj-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform, opacity;
+}
+.proj-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 40%, transparent 30%, rgba(6, 22, 41, 0.55) 100%),
+    linear-gradient(
+      180deg,
+      rgba(6, 22, 41, 0.78) 0%,
+      rgba(6, 22, 41, 0.28) 32%,
+      rgba(6, 22, 41, 0.45) 64%,
+      rgba(6, 22, 41, 0.92) 100%
+    );
+}
+.proj .stage {
+  position: relative;
+  z-index: 1;
+}
 .proj .headline,
 .proj .lede,
 .proj .loc,
 .proj .eyebrow {
-  text-shadow: 0 2px 30px rgba(6, 22, 41, 0.9);
-}
-.proj .panel {
-  max-width: 540px;
+  text-shadow: 0 2px 30px rgba(6, 22, 41, 0.95);
 }
 
 /* ---------- Location + status pills ---------- */
