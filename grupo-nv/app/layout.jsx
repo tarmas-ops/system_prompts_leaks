@@ -1,24 +1,18 @@
 import "./globals.css";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Jost } from "next/font/google";
 
-const display = Cormorant_Garamond({
+// Geometric sans matching the Grupo NV logo lettering — used across the page.
+const jost = Jost({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-body",
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-jost",
   display: "swap",
 });
 
 export const metadata = {
   title: "Grupo NV — Real Estate Private Equity",
   description:
-    "Value is not found. It is created. An immersive journey through the lifecycle of institutional real estate value creation.",
+    "Capital. Disciplina. Diseño. Ejecución. Construimos plataformas inmobiliarias de largo plazo.",
 };
 
 export const viewport = {
@@ -27,7 +21,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="es" className={jost.variable}>
       <body>{children}</body>
     </html>
   );

@@ -16,7 +16,9 @@ const KEYFRAMES = [
   { pos: [-28, 16, 52], look: [0, 9, 0] }, // 03 Lifecycle — descend into the build
   { pos: [38, 10, 30], look: [0, 11, -8] }, // 04 Casa Nuba — low, intimate
   { pos: [-52, 14, 6], look: [-6, 7, -28] }, // 05 Bodeflex — fly the corridor
-  { pos: [0, 138, 64], look: [0, 0, -18] }, // 06 Close — rise to sunrise
+  { pos: [26, 9, 44], look: [-8, 6, 0] }, // 06 +Value — street level
+  { pos: [0, 70, 120], look: [0, 6, 0] }, // 07 Leadership — calm, pulled back
+  { pos: [0, 138, 64], look: [0, 0, -18] }, // 08 Close — rise to sunrise
 ];
 
 function Rig() {
@@ -76,12 +78,34 @@ function SunLight() {
   return <directionalLight ref={light} intensity={1.6} castShadow />;
 }
 
+// Smoothstep helper.
+function ss(e0, e1, x) {
+  const t = THREE.MathUtils.clamp((x - e0) / (e1 - e0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
 export default function Experience() {
   const setReady = useJourney((s) => s.setReady);
+  const wrap = useRef(null);
   useEffect(() => setReady(true), [setReady]);
 
+  // Dissolve the 3D world as the real project renders take over (the
+  // "3D → reality" transition), then bring it back for the closing rise.
+  useEffect(() => {
+    const unsub = useJourney.subscribe((s) => {
+      if (!wrap.current) return;
+      const p = s.progress;
+      // Visible during build (0–0.32), fades for portfolio, returns for close.
+      const fadeOut = ss(0.3, 0.42, p);
+      const fadeIn = ss(0.8, 0.9, p);
+      const opacity = 1 - fadeOut * (1 - 0.16) + fadeIn * (1 - 0.16);
+      wrap.current.style.opacity = THREE.MathUtils.clamp(opacity, 0.16, 1).toFixed(3);
+    });
+    return unsub;
+  }, []);
+
   return (
-    <div className="scene-canvas">
+    <div className="scene-canvas" ref={wrap}>
       <Canvas
         camera={{ fov: 50, near: 0.1, far: 2000, position: KEYFRAMES[0].pos }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
