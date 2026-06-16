@@ -1,8 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Billboard, useTexture } from "@react-three/drei";
-import { useRef, useEffect, Suspense } from "react";
+import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
 import Terrain from "@/components/three/Terrain";
@@ -79,53 +78,6 @@ function SunLight() {
   return <directionalLight ref={light} intensity={1.6} castShadow />;
 }
 
-// Smoothstep helper.
-function ss(e0, e1, x) {
-  const t = THREE.MathUtils.clamp((x - e0) / (e1 - e0), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-// Project renders living inside the 3D world as billboards the camera flies
-// toward. They fade in/out by scroll progress, so the real Casa Nuba and
-// Bodeflex imagery becomes the cinematic background of their chapters.
-function ProjectPlanes() {
-  const casa = useTexture("/projects/casa-nuba.png");
-  const bode = useTexture("/projects/bodeflex.png");
-  const casaRef = useRef();
-  const bodeRef = useRef();
-
-  useFrame(() => {
-    const p = useJourney.getState().progress;
-    if (casaRef.current) {
-      const o = ss(0.28, 0.36, p) * (1 - ss(0.47, 0.53, p));
-      casaRef.current.material.opacity = o;
-      casaRef.current.scale.setScalar(1 + (1 - o) * 0.06);
-    }
-    if (bodeRef.current) {
-      const o = ss(0.46, 0.52, p) * (1 - ss(0.62, 0.68, p));
-      bodeRef.current.material.opacity = o;
-      bodeRef.current.scale.setScalar(1 + (1 - o) * 0.06);
-    }
-  });
-
-  return (
-    <>
-      <Billboard position={[0, 11, -10]}>
-        <mesh ref={casaRef}>
-          <planeGeometry args={[66, 37]} />
-          <meshBasicMaterial map={casa} transparent opacity={0} toneMapped={false} />
-        </mesh>
-      </Billboard>
-      <Billboard position={[-6, 8, -30]}>
-        <mesh ref={bodeRef}>
-          <planeGeometry args={[70, 39]} />
-          <meshBasicMaterial map={bode} transparent opacity={0} toneMapped={false} />
-        </mesh>
-      </Billboard>
-    </>
-  );
-}
-
 export default function Experience() {
   const setReady = useJourney((s) => s.setReady);
   useEffect(() => setReady(true), [setReady]);
@@ -146,9 +98,6 @@ export default function Experience() {
         <Particles />
         <Terrain />
         <City />
-        <Suspense fallback={null}>
-          <ProjectPlanes />
-        </Suspense>
 
         <Rig />
       </Canvas>
