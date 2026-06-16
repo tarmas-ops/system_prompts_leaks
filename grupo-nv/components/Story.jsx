@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useJourney, SECTIONS } from "@/lib/store";
 import KpiCard from "@/components/KpiCard";
+import { Monogram, LogoLockup } from "@/components/Logo";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
@@ -47,10 +48,15 @@ function useReveal() {
   return ref;
 }
 
-function Chapter({ index, align = "left", eyebrow, children }) {
+function Chapter({ index, align = "left", eyebrow, className = "", children }) {
   const ref = useReveal();
   return (
-    <section ref={ref} className="chapter" data-align={align} id={`ch-${index}`}>
+    <section
+      ref={ref}
+      className={`chapter ${className}`}
+      data-align={align}
+      id={`ch-${index}`}
+    >
       <div className={align === "center" ? "stage" : "panel"}>
         {eyebrow && (
           <div className="eyebrow" data-reveal>
@@ -63,72 +69,44 @@ function Chapter({ index, align = "left", eyebrow, children }) {
   );
 }
 
-function Project({ index, eyebrow, image, alt, title, location, lede, kpis }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const el = ref.current;
-    const ctx = gsap.context(() => {
-      gsap.from(el.querySelectorAll("[data-reveal]"), {
-        yPercent: 110,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.07,
-        scrollTrigger: { trigger: el, start: "top 76%" },
-      });
-      gsap.from(el.querySelector(".frame"), {
-        opacity: 0,
-        scale: 1.08,
-        duration: 1.4,
-        ease: "power3.out",
-        scrollTrigger: { trigger: el, start: "top 78%" },
-      });
-    }, el);
-    return () => ctx.revert();
-  }, []);
-
+/* Project chapter — floating panel over the 3D render background. */
+function Project({ index, eyebrow, title, location, lede, kpis }) {
+  const ref = useReveal();
   return (
-    <section ref={ref} className="chapter" data-align="center" id={`ch-${index}`}>
-      <div className="project">
-        <div className="frame">
-          <span className="glass tag">{`${String(index + 1).padStart(2, "0")} · ${eyebrow}`}</span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt={alt} loading="lazy" />
+    <section ref={ref} className="chapter proj" data-align="left" id={`ch-${index}`}>
+      <div className="panel">
+        <div className="eyebrow" data-reveal>
+          {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
         </div>
-        <div className="info" style={{ textAlign: "left" }}>
-          <h2 className="headline" style={{ fontSize: "clamp(1.9rem,4vw,3.2rem)" }}>
-            <span className="line">
-              <span data-reveal>{title}</span>
-            </span>
-          </h2>
-          {location && (
-            <div className="loc" data-reveal>
-              ◐ {location}
-            </div>
-          )}
-          <p className="lede" data-reveal>
-            {lede}
-          </p>
-          <div className="kpi-grid" style={{ maxWidth: "none" }}>
-            {kpis.map((k) => (
-              <KpiCard key={k.label} {...k} />
-            ))}
+        <Headline lines={title} style={{ fontSize: "clamp(2rem,4.4vw,3.4rem)" }} />
+        {location && (
+          <div className="loc" data-reveal>
+            ◐ {location}
           </div>
+        )}
+        <p className="lede" data-reveal>
+          {lede}
+        </p>
+        <div className="kpi-grid">
+          {kpis.map((k) => (
+            <KpiCard key={k.label} {...k} />
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function Member({ initials, name, role, bio, prev }) {
+function Member({ photo, name, role, bio, prev }) {
   return (
     <div className="glass member" data-fade>
-      <div className="ph">{initials}</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="ph" src={photo} alt={name} loading="lazy" />
       <div>
         <h3>{name}</h3>
         <div className="role">{role}</div>
         <div className="bio">{bio}</div>
-        <div className="prev">{prev}</div>
+        {prev && <div className="prev">{prev}</div>}
       </div>
     </div>
   );
@@ -157,26 +135,24 @@ export default function Story() {
     <>
       <div className="brand">
         <div className="brand-logo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="mark" src="/projects/logo-mark.png" alt="Grupo NV" />
+          <Monogram size={26} />
           <span>GRUPO NV</span>
         </div>
         <small>Real Estate Private Equity</small>
       </div>
       <Rail />
       <div className="scroll-cue" data-reveal>
-        Scroll
+        Desliza
       </div>
 
       <main className="story">
-        {/* 01 — MANIFESTO */}
+        {/* 01 — MANIFIESTO */}
         <Chapter index={0} align="center">
-          <div className="logo-plate" data-fade>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/projects/logo-grupo-nv.jpeg" alt="Grupo NV — Real Estate Private Equity" />
+          <div data-fade>
+            <LogoLockup />
           </div>
           <Headline
-            lines={["Value is not found.", "It is created."]}
+            lines={["El valor no se encuentra.", "Se crea."]}
             style={{ marginTop: "2.4rem" }}
           />
           <p className="lede" data-reveal style={{ margin: "1.4rem auto 0", letterSpacing: "0.04em" }}>
@@ -184,7 +160,7 @@ export default function Story() {
           </p>
         </Chapter>
 
-        {/* 02 — THESIS + REAL TRACK RECORD */}
+        {/* 02 — TESIS + TRACK RECORD REAL */}
         <Chapter index={1} align="center" eyebrow="La Disciplina">
           <Headline lines={["Construimos plataformas", "inmobiliarias de largo plazo."]} />
           <div className="pillars" data-fade>
@@ -218,28 +194,26 @@ export default function Story() {
           </div>
         </Chapter>
 
-        {/* 03 — VALUE LIFECYCLE (3D build → dissolves into reality) */}
+        {/* 03 — CÓMO CREAMOS VALOR (3D build) */}
         <Chapter index={2} eyebrow="Cómo creamos valor">
-          <Headline lines={["From land", "to landmark."]} />
+          <Headline lines={["De la tierra", "al hito."]} />
           <p className="lede" data-reveal>
             Un proceso disciplinado para transformar oportunidades en activos
-            generadores de valor — construido en tiempo real mientras haces scroll.
+            generadores de valor — construido en tiempo real mientras navegas.
           </p>
-          <div className="pillars" data-fade style={{ fontSize: "clamp(0.95rem,1.8vw,1.3rem)" }}>
+          <div className="pillars" data-fade style={{ fontSize: "clamp(0.9rem,1.7vw,1.25rem)" }}>
             Originación <span>·</span> Underwriting <span>·</span> Estructuración{" "}
             <span>·</span> Desarrollo <span>·</span> Operación <span>·</span> Monetización
           </div>
         </Chapter>
 
-        {/* 04 — CASA NUBA */}
+        {/* 04 — CASA NUBA (render en fondo 3D) */}
         <Project
           index={3}
-          eyebrow="Casa Nuba · Hospitality"
-          image="/projects/casa-nuba.png"
-          alt="Casa Nuba — desarrollo turístico boutique en Punta Lobos"
-          title="Casa Nuba."
+          eyebrow="Casa Nuba · Hotelería"
+          title={["Casa Nuba."]}
           location="Punta Lobos, Pichilemu"
-          lede="Desarrollo turístico boutique Open Light: 18 unidades, inversión de $1.900 MM, orientado a la generación de flujos recurrentes y sostenibles."
+          lede="Desarrollo turístico boutique Open Light: 18 unidades, inversión de $1.900 MM, orientado a flujos recurrentes y sostenibles en el largo plazo."
           kpis={[
             { label: "TIR Apalancada", value: 39.4, suffix: "%", decimals: 1 },
             { label: "NOI Año 1", value: 229, prefix: "$", suffix: " MM" },
@@ -248,13 +222,11 @@ export default function Story() {
           ]}
         />
 
-        {/* 05 — BODEFLEX */}
+        {/* 05 — BODEFLEX (render en fondo 3D) */}
         <Project
           index={4}
           eyebrow="Bodeflex Valle Grande · Industrial"
-          image="/projects/bodeflex.png"
-          alt="Bodeflex Valle Grande — bodegaje flexible en Lampa"
-          title="Bodeflex Valle Grande."
+          title={["Bodeflex", "Valle Grande."]}
           location="Valle Grande, Lampa"
           lede="Bodegaje flexible institucional: 22.080 m² arrendables, unidades modulares desde 200 m², 6–8 m de altura libre y seguridad 24/7."
           kpis={[
@@ -265,8 +237,8 @@ export default function Story() {
           ]}
         />
 
-        {/* 06 — +VALUE (teaser) */}
-        <Chapter index={5} align="center" eyebrow="+Value · Opportunistic">
+        {/* 06 — +VALUE */}
+        <Chapter index={5} align="center" eyebrow="+Value · Oportunístico">
           <Headline lines={["Valor donde", "otros ven desgaste."]} />
           <div className="glass mini" data-fade>
             <div style={{ textAlign: "left" }}>
@@ -282,46 +254,45 @@ export default function Story() {
           </div>
         </Chapter>
 
-        {/* 07 — LEADERSHIP & ADVISORY */}
-        <Chapter index={6} align="center" eyebrow="Liderazgo & Advisory Board">
-          <Headline lines={["Quién está", "detrás del capital."]} />
+        {/* 07 — LIDERAZGO & CONSEJO ASESOR */}
+        <Chapter index={6} align="center" eyebrow="Liderazgo & Consejo Asesor">
+          <Headline lines={["Quiénes están", "detrás del capital."]} />
           <div className="team">
             <Member
-              initials="TA"
+              photo="/team/tomas.jpg"
               name="Tomás Armas Alvear"
-              role="Founder & Managing Partner"
+              role="Socio Fundador & Managing Partner"
               bio="Desarrollo inmobiliario, originación de oportunidades, inversiones y relación con inversionistas."
             />
             <Member
-              initials="CA"
+              photo="/team/cristian.jpg"
               name="Cristián Armas Morel"
-              role="Founder & Strategist Partner"
+              role="Socio Fundador & Strategist Partner"
               bio="Estrategia corporativa, desarrollo de negocios, relaciones institucionales y expansión."
             />
             <Member
-              initials="PC"
+              photo="/team/pedro.jpg"
               name="Pedro Cueto"
-              role="Advisory Board"
+              role="Consejo Asesor"
               bio="Estrategia corporativa, escalamiento empresarial, gobierno corporativo y evaluación de inversiones."
               prev="Ex Bain & Company · Director de Compañías"
             />
             <Member
-              initials="BB"
+              photo="/team/boris.jpg"
               name="Boris Buvinic"
-              role="Advisory Board"
+              role="Consejo Asesor"
               bio="Estructuración financiera, relación con banca, levantamiento de capital y gobierno corporativo."
               prev="Ex Gerente General Banco Itaú Chile"
             />
           </div>
         </Chapter>
 
-        {/* 08 — CLOSE + CTA */}
+        {/* 08 — CIERRE + CTA */}
         <Chapter index={7} align="center">
-          <div className="logo-plate" data-fade style={{ marginBottom: "2rem" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/projects/logo-grupo-nv.jpeg" alt="Grupo NV" />
+          <div data-fade style={{ marginBottom: "1.8rem" }}>
+            <LogoLockup />
           </div>
-          <Headline lines={["Originate.", "Develop. Operate."]} />
+          <Headline lines={["Originar.", "Desarrollar. Operar."]} />
           <p className="lede" data-reveal style={{ margin: "1.4rem auto 0" }}>
             Capital disciplinado, activos reales, valor durable.
           </p>
@@ -339,7 +310,7 @@ export default function Story() {
   );
 }
 
-/* Scroll-triggered count-up. */
+/* Conteo animado al entrar en viewport. */
 function CountUp({ value, decimals = 0 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -355,10 +326,11 @@ function CountUp({ value, decimals = 0 }) {
           duration: 1.2,
           ease: "power2.out",
           onUpdate: () => {
-            if (el) el.textContent = obj.v.toLocaleString("es-CL", {
-              minimumFractionDigits: decimals,
-              maximumFractionDigits: decimals,
-            });
+            if (el)
+              el.textContent = obj.v.toLocaleString("es-CL", {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+              });
           },
         }),
     });
