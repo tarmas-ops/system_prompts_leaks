@@ -11,15 +11,12 @@ import City from "@/components/three/City";
 // One camera keyframe per chapter: where the lens sits + what it looks at.
 // This is the cinematic spine — the camera "travels" the ecosystem on scroll.
 const KEYFRAMES = [
-  { pos: [0, 60, 120], look: [0, 0, 0] }, // 01 Opening — high, distant
-  { pos: [0, 28, 90], look: [0, 2, 0] }, // 02 Origination — descend to site
-  { pos: [-30, 18, 55], look: [0, 8, 0] }, // 03 Development — among the rise
-  { pos: [40, 10, 30], look: [0, 12, -10] }, // 04 Casa Nuba — low, intimate
-  { pos: [-55, 14, 5], look: [0, 6, -30] }, // 05 Bodeflex — fly the corridor
-  { pos: [20, 8, 45], look: [-10, 6, 0] }, // 06 +Value — street level
-  { pos: [0, 95, 150], look: [0, 0, 0] }, // 07 Platform Scale — pull back
-  { pos: [0, 50, 80], look: [0, 10, 0] }, // 08 Investment Platform — dashboards
-  { pos: [0, 140, 60], look: [0, 0, -20] }, // 09 Final — rise to sunrise
+  { pos: [0, 58, 125], look: [0, 0, 0] }, // 01 Manifesto — high, distant
+  { pos: [0, 34, 95], look: [0, 4, 0] }, // 02 Thesis — settle toward site
+  { pos: [-28, 16, 52], look: [0, 9, 0] }, // 03 Lifecycle — descend into the build
+  { pos: [38, 10, 30], look: [0, 11, -8] }, // 04 Casa Nuba — low, intimate
+  { pos: [-52, 14, 6], look: [-6, 7, -28] }, // 05 Bodeflex — fly the corridor
+  { pos: [0, 138, 64], look: [0, 0, -18] }, // 06 Close — rise to sunrise
 ];
 
 function Rig() {

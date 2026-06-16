@@ -5,10 +5,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useJourney, SECTIONS } from "@/lib/store";
 import KpiCard from "@/components/KpiCard";
+import { Monogram, LogoLockup } from "@/components/Logo";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-/* Split a headline into animatable lines. */
 function Headline({ lines, className = "" }) {
   return (
     <h1 className={`headline ${className}`}>
@@ -27,7 +27,6 @@ function Chapter({ index, align = "left", eyebrow, children }) {
   useEffect(() => {
     const el = ref.current;
     const ctx = gsap.context(() => {
-      // Staggered line + element reveal as the chapter enters.
       gsap.from(el.querySelectorAll("[data-reveal]"), {
         yPercent: 110,
         opacity: 0,
@@ -36,11 +35,13 @@ function Chapter({ index, align = "left", eyebrow, children }) {
         stagger: 0.09,
         scrollTrigger: { trigger: el, start: "top 72%" },
       });
-      // Gentle parallax exit so chapters feel layered.
-      gsap.to(el.querySelector(".panel, .stage"), {
-        yPercent: -8,
-        ease: "none",
-        scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+      gsap.from(el.querySelectorAll("[data-fade]"), {
+        opacity: 0,
+        y: 30,
+        duration: 1.1,
+        ease: "power3.out",
+        stagger: 0.12,
+        scrollTrigger: { trigger: el, start: "top 70%" },
       });
     }, el);
     return () => ctx.revert();
@@ -49,8 +50,65 @@ function Chapter({ index, align = "left", eyebrow, children }) {
   return (
     <section ref={ref} className="chapter" data-align={align} id={`ch-${index}`}>
       <div className={align === "center" ? "stage" : "panel"}>
-        {eyebrow && <div className="eyebrow" data-reveal>{`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}</div>}
+        {eyebrow && (
+          <div className="eyebrow" data-reveal>
+            {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
+          </div>
+        )}
         {children}
+      </div>
+    </section>
+  );
+}
+
+/* Project showcase using a real render. */
+function Project({ index, eyebrow, image, alt, title, lede, kpis }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const ctx = gsap.context(() => {
+      gsap.from(el.querySelectorAll("[data-reveal]"), {
+        yPercent: 110,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+        stagger: 0.08,
+        scrollTrigger: { trigger: el, start: "top 74%" },
+      });
+      gsap.from(el.querySelector(".frame"), {
+        opacity: 0,
+        scale: 1.06,
+        duration: 1.3,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 76%" },
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={ref} className="chapter" data-align="center" id={`ch-${index}`}>
+      <div className="project">
+        <div className="frame">
+          <span className="glass tag">{`${String(index + 1).padStart(2, "0")} · ${eyebrow}`}</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt={alt} loading="lazy" />
+        </div>
+        <div className="info" style={{ textAlign: "left" }}>
+          <h2 className="headline" style={{ fontSize: "clamp(2rem,4vw,3.4rem)" }}>
+            <span className="line">
+              <span data-reveal>{title}</span>
+            </span>
+          </h2>
+          <p className="lede" data-reveal>
+            {lede}
+          </p>
+          <div className="kpi-grid" style={{ maxWidth: "none" }}>
+            {kpis.map((k) => (
+              <KpiCard key={k.label} {...k} />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -65,7 +123,9 @@ function Rail() {
           key={i}
           data-active={i === section}
           aria-label={`Go to chapter ${i + 1}`}
-          onClick={() => document.getElementById(`ch-${i}`)?.scrollIntoView({ behavior: "smooth" })}
+          onClick={() =>
+            document.getElementById(`ch-${i}`)?.scrollIntoView({ behavior: "smooth" })
+          }
         />
       ))}
     </nav>
@@ -76,137 +136,147 @@ export default function Story() {
   return (
     <>
       <div className="brand">
-        Grupo NV
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Monogram size={26} />
+          <span>Grupo NV</span>
+        </div>
         <small>Real Estate Private Equity</small>
       </div>
       <Rail />
       <div className="scroll-cue" data-reveal>
-        Scroll to begin
+        Scroll
       </div>
 
       <main className="story">
-        {/* 01 — OPENING */}
+        {/* 01 — MANIFESTO */}
         <Chapter index={0} align="center">
-          <Headline lines={["Value is not found.", "It is created."]} />
-          <p className="lede" data-reveal>
-            An institutional journey through the full lifecycle of real estate
-            value creation.
-          </p>
+          <div data-fade>
+            <LogoLockup />
+          </div>
+          <Headline
+            lines={["Value is not found.", "It is created."]}
+            className=""
+          />
         </Chapter>
 
-        {/* 02 — ORIGINATION */}
-        <Chapter index={1} eyebrow="Origination">
-          <Headline lines={["We see value", "before the market", "does."]} />
-          <p className="lede" data-reveal>
-            Off-market opportunities. Market inefficiencies. Hidden value —
-            illuminated through disciplined sourcing and underwriting.
+        {/* 02 — THESIS + TRACK RECORD */}
+        <Chapter index={1} align="center" eyebrow="The Discipline">
+          <Headline lines={["Originate.", "Develop. Operate."]} />
+          <p className="lede" data-reveal style={{ margin: "1.6rem auto 0" }}>
+            A vertically integrated private equity platform that creates
+            institutional-quality real estate — from raw land to operating asset.
           </p>
-          <div className="kpi-grid">
-            <KpiCard label="Off-Market Deal Flow" value={1.8} suffix="B" prefix="$" decimals={1} />
-            <KpiCard label="Markets Screened" value={42} />
-            <KpiCard label="Conviction Rate" value={3.2} suffix="%" decimals={1} />
+          <div className="stats">
+            <div className="stat" data-fade>
+              <div className="n">
+                $<CountUpInline value={2.6} decimals={1} />B
+              </div>
+              <div className="k">Assets Under Management</div>
+            </div>
+            <div className="stat" data-fade>
+              <div className="n">
+                <CountUpInline value={18.5} decimals={1} />%
+              </div>
+              <div className="k">Target Net IRR</div>
+            </div>
+            <div className="stat" data-fade>
+              <div className="n">
+                <CountUpInline value={2.1} decimals={1} />x
+              </div>
+              <div className="k">Equity Multiple</div>
+            </div>
           </div>
         </Chapter>
 
-        {/* 03 — DEVELOPMENT */}
-        <Chapter index={2} align="right" eyebrow="Development">
-          <Headline lines={["From concept", "to completion."]} />
+        {/* 03 — LIFECYCLE (3D build, reveals Casa Nuba) */}
+        <Chapter index={2} eyebrow="The Value Lifecycle">
+          <Headline lines={["From land", "to landmark."]} />
           <p className="lede" data-reveal>
-            Land becomes a masterplan. Structure becomes architecture. We build
-            institutional-quality assets in real time.
+            Watch capital become real estate. Terrain becomes masterplan,
+            structure becomes architecture — built in real time as you scroll.
           </p>
+          <div className="pillars" data-fade>
+            Land <span>·</span> Concept <span>·</span> Construction{" "}
+            <span>·</span> Operation
+          </div>
         </Chapter>
 
         {/* 04 — CASA NUBA */}
-        <Chapter index={3} eyebrow="Casa Nuba · Hospitality">
-          <Headline lines={["Punta de Lobos.", "Engineered to", "perform."]} />
-          <p className="lede" data-reveal>
-            A boutique cliffside hotel — where atmosphere meets underwriting.
-          </p>
-          <div className="kpi-grid">
-            <KpiCard label="NOI" value={6.4} prefix="$" suffix="M" decimals={1} delta="▲ stabilized" />
-            <KpiCard label="Occupancy" value={82} suffix="%" />
-            <KpiCard label="ADR" value={540} prefix="$" />
-            <KpiCard label="DSCR" value={1.8} suffix="x" decimals={1} />
-          </div>
-        </Chapter>
+        <Project
+          index={3}
+          eyebrow="Casa Nuba · Hospitality"
+          image="/projects/casa-nuba.png"
+          alt="Casa Nuba — boutique cliffside hotel in Punta de Lobos"
+          title="Casa Nuba, Punta de Lobos."
+          lede="A boutique cliffside hotel where atmosphere meets underwriting — engineered to perform."
+          kpis={[
+            { label: "Stabilized NOI", value: 6.4, prefix: "$", suffix: "M", decimals: 1 },
+            { label: "Occupancy", value: 82, suffix: "%" },
+            { label: "ADR", value: 540, prefix: "$" },
+            { label: "DSCR", value: 1.8, suffix: "x", decimals: 1 },
+          ]}
+        />
 
         {/* 05 — BODEFLEX */}
-        <Chapter index={4} align="right" eyebrow="Bodeflex · Industrial">
-          <Headline lines={["Logistics", "at the speed", "of capital."]} />
-          <p className="lede" data-reveal>
-            Class-A industrial corridors assembled to spec — steel, throughput,
-            and tenancy as a single operating system.
-          </p>
-          <div className="kpi-grid">
-            <KpiCard label="GLA" value={1.2} suffix="M sqft" decimals={1} />
-            <KpiCard label="Occupancy" value={96} suffix="%" />
-            <KpiCard label="WALT" value={7.4} suffix=" yrs" decimals={1} />
+        <Project
+          index={4}
+          eyebrow="Bodeflex Valle Grande · Industrial"
+          image="/projects/bodeflex.png"
+          alt="Bodeflex Valle Grande — flexible industrial warehousing in Lampa"
+          title="Bodeflex Valle Grande."
+          lede="Class-A flexible warehousing in Lampa. Modular units from 100 m², 6–8 m clear height, 24/7 security — logistics at the speed of capital."
+          kpis={[
+            { label: "GLA", value: 1.2, suffix: "M sqft", decimals: 1 },
+            { label: "Occupancy", value: 96, suffix: "%" },
+            { label: "Units from", value: 100, suffix: " m²" },
+            { label: "WALT", value: 7.4, suffix: " yrs", decimals: 1 },
+          ]}
+        />
+
+        {/* 06 — CLOSE + CTA */}
+        <Chapter index={5} align="center">
+          <div data-fade style={{ marginBottom: "1.4rem" }}>
+            <Monogram size={64} />
           </div>
-        </Chapter>
-
-        {/* 06 — +VALUE */}
-        <Chapter index={5} eyebrow="+Value · Retail Repositioning">
-          <Headline lines={["We don't buy", "buildings.", "We compound", "NOI."]} />
-          <p className="lede" data-reveal>
-            Tired retail, repositioned. New facades, new tenants, new traffic —
-            value creation you can watch happen.
+          <Headline lines={["Originate.", "Develop. Operate."]} />
+          <p className="lede" data-reveal style={{ margin: "1.6rem auto 0" }}>
+            Grupo NV — disciplined capital, real assets, durable value.
           </p>
-          <div className="kpi-grid">
-            <KpiCard label="NOI Growth" value={38} suffix="%" delta="▲ post-repositioning" />
-            <KpiCard label="Occupancy" value={94} suffix="%" delta="from 61%" />
-            <KpiCard label="Value Created" value={24} prefix="$" suffix="M" />
+          <div className="cta" data-fade>
+            <a className="btn btn-primary" href="mailto:invest@gruponv.cl">
+              Request the investor deck
+            </a>
+            <a className="btn btn-ghost" href="mailto:invest@gruponv.cl">
+              Contact the team
+            </a>
           </div>
-        </Chapter>
-
-        {/* 07 — PLATFORM SCALE */}
-        <Chapter index={6} align="center" eyebrow="Platform Scale">
-          <Headline lines={["One ecosystem.", "Disciplined", "capital."]} />
-          <p className="lede" data-reveal>
-            Hospitality, industrial, commercial and retail — a network of assets
-            linked by a single allocation discipline.
-          </p>
-        </Chapter>
-
-        {/* 08 — INVESTMENT PLATFORM */}
-        <Chapter index={7} align="center" eyebrow="Investment Platform">
-          <Headline lines={["Institutional", "by design."]} />
-          <div className="glass dash" data-reveal>
-            <div className="col">
-              <strong style={{ fontWeight: 400, letterSpacing: "0.04em" }}>
-                Portfolio Allocation
-              </strong>
-              {[
-                ["Hospitality", 34],
-                ["Industrial", 41],
-                ["Retail", 17],
-                ["Commercial", 8],
-              ].map(([k, v]) => (
-                <div className="bar-row" key={k}>
-                  <span>{k}</span>
-                  <span className="bar-track">
-                    <span className="bar-fill" style={{ width: `${v}%` }} />
-                  </span>
-                  <span>{v}%</span>
-                </div>
-              ))}
-            </div>
-            <div className="col">
-              <KpiCard label="AUM" value={2.6} prefix="$" suffix="B" decimals={1} />
-              <KpiCard label="Net IRR (target)" value={18.5} suffix="%" decimals={1} />
-              <KpiCard label="Equity Multiple" value={2.1} suffix="x" decimals={1} />
-            </div>
-          </div>
-        </Chapter>
-
-        {/* 09 — FINAL */}
-        <Chapter index={8} align="center">
-          <Headline lines={["Originate.", "Develop.", "Operate."]} />
-          <p className="lede" data-reveal style={{ margin: "1.8rem auto 0" }}>
-            Grupo NV — Real Estate Private Equity
-          </p>
         </Chapter>
       </main>
     </>
   );
+}
+
+/* Lightweight inline count-up for the thesis stats. */
+function CountUpInline({ value, decimals = 0 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const obj = { v: 0 };
+    const st = ScrollTrigger.create({
+      trigger: el,
+      start: "top 85%",
+      once: true,
+      onEnter: () =>
+        gsap.to(obj, {
+          v: value,
+          duration: 1.2,
+          ease: "power2.out",
+          onUpdate: () => {
+            if (el) el.textContent = obj.v.toFixed(decimals);
+          },
+        }),
+    });
+    return () => st.kill();
+  }, [value, decimals]);
+  return <span ref={ref}>0</span>;
 }

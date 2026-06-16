@@ -3,7 +3,7 @@
 import { create } from "zustand";
 
 // Total number of narrative chapters in the experience.
-export const SECTIONS = 9;
+export const SECTIONS = 6;
 
 /**
  * Global scroll/journey state shared between the DOM story layer and the
