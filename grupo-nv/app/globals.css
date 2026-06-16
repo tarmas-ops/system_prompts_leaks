@@ -124,8 +124,9 @@ h3 {
 }
 
 .headline {
-  font-size: clamp(2.6rem, 8.5vw, 7.5rem);
-  max-width: 16ch;
+  font-size: clamp(2.4rem, 7vw, 6.4rem);
+  max-width: none;
+  text-wrap: balance;
 }
 
 .headline .line-block {
@@ -149,6 +150,7 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .panel {
