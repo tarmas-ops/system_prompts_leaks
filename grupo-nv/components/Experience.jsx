@@ -1,7 +1,8 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { Billboard, useTexture } from "@react-three/drei";
+import { useRef, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { useJourney, SECTIONS } from "@/lib/store";
 import Terrain from "@/components/three/Terrain";
@@ -84,35 +85,60 @@ function ss(e0, e1, x) {
   return t * t * (3 - 2 * t);
 }
 
-export default function Experience() {
-  const setReady = useJourney((s) => s.setReady);
-  const wrap = useRef(null);
-  useEffect(() => setReady(true), [setReady]);
+// Project renders living inside the 3D world as billboards the camera flies
+// toward. They fade in/out by scroll progress, so the real Casa Nuba and
+// Bodeflex imagery becomes the cinematic background of their chapters.
+function ProjectPlanes() {
+  const casa = useTexture("/projects/casa-nuba.png");
+  const bode = useTexture("/projects/bodeflex.png");
+  const casaRef = useRef();
+  const bodeRef = useRef();
 
-  // Dissolve the 3D world as the real project renders take over (the
-  // "3D → reality" transition), then bring it back for the closing rise.
-  useEffect(() => {
-    const unsub = useJourney.subscribe((s) => {
-      if (!wrap.current) return;
-      const p = s.progress;
-      // Visible during build (0–0.32), fades for portfolio, returns for close.
-      const fadeOut = ss(0.3, 0.42, p);
-      const fadeIn = ss(0.8, 0.9, p);
-      const opacity = 1 - fadeOut * (1 - 0.16) + fadeIn * (1 - 0.16);
-      wrap.current.style.opacity = THREE.MathUtils.clamp(opacity, 0.16, 1).toFixed(3);
-    });
-    return unsub;
-  }, []);
+  useFrame(() => {
+    const p = useJourney.getState().progress;
+    if (casaRef.current) {
+      const o = ss(0.28, 0.36, p) * (1 - ss(0.47, 0.53, p));
+      casaRef.current.material.opacity = o;
+      casaRef.current.scale.setScalar(1 + (1 - o) * 0.06);
+    }
+    if (bodeRef.current) {
+      const o = ss(0.46, 0.52, p) * (1 - ss(0.62, 0.68, p));
+      bodeRef.current.material.opacity = o;
+      bodeRef.current.scale.setScalar(1 + (1 - o) * 0.06);
+    }
+  });
 
   return (
-    <div className="scene-canvas" ref={wrap}>
+    <>
+      <Billboard position={[0, 11, -10]}>
+        <mesh ref={casaRef}>
+          <planeGeometry args={[66, 37]} />
+          <meshBasicMaterial map={casa} transparent opacity={0} toneMapped={false} />
+        </mesh>
+      </Billboard>
+      <Billboard position={[-6, 8, -30]}>
+        <mesh ref={bodeRef}>
+          <planeGeometry args={[70, 39]} />
+          <meshBasicMaterial map={bode} transparent opacity={0} toneMapped={false} />
+        </mesh>
+      </Billboard>
+    </>
+  );
+}
+
+export default function Experience() {
+  const setReady = useJourney((s) => s.setReady);
+  useEffect(() => setReady(true), [setReady]);
+
+  return (
+    <div className="scene-canvas">
       <Canvas
         camera={{ fov: 50, near: 0.1, far: 2000, position: KEYFRAMES[0].pos }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 1.8]}
       >
         <color attach="background" args={["#061629"]} />
-        <fog attach="fog" args={["#061629", 90, 320]} />
+        <fog attach="fog" args={["#061629", 90, 360]} />
         <ambientLight intensity={0.35} />
         <SunLight />
         <hemisphereLight args={["#2a4670", "#0b2343", 0.5]} />
@@ -120,6 +146,9 @@ export default function Experience() {
         <Particles />
         <Terrain />
         <City />
+        <Suspense fallback={null}>
+          <ProjectPlanes />
+        </Suspense>
 
         <Rig />
       </Canvas>
