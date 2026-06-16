@@ -34,20 +34,19 @@ function Chapter({ index, eyebrow, className = "", children }) {
   );
 }
 
-/* Project chapter — full-bleed cinematic render with parallax + slow zoom,
-   floating text and KPIs on top. */
+/* Project chapter — the render as a background-removed model floating in the
+   3D scene, framed by headline (top) and KPIs (bottom). Subtle parallax + zoom. */
 function Project({ index, eyebrow, image, title, location, lede, kpis }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
-  // Parallax drift + a continuous slow zoom as the section travels the viewport.
-  const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.18, 1.08, 1.16]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.12, 1.04, 1.12]);
 
   return (
-    <section ref={ref} className="chapter proj" data-align="center" id={`ch-${index}`}>
+    <section ref={ref} className="chapter proj" id={`ch-${index}`}>
       <motion.div className="proj-bg" style={{ y }}>
         <motion.img
           // eslint-disable-next-line @next/next/no-img-element
@@ -62,19 +61,23 @@ function Project({ index, eyebrow, image, title, location, lede, kpis }) {
         <div className="proj-scrim" />
       </motion.div>
 
-      <div className="stage">
-        <Reveal className="eyebrow">
-          {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
-        </Reveal>
-        <Headline lines={title} style={{ fontSize: "clamp(2.2rem,5vw,4rem)" }} />
-        {location && <Reveal className="loc">◐ {location}</Reveal>}
-        <Reveal className="lede" delay={0.05}>
-          {lede}
-        </Reveal>
-        <div className="kpi-grid">
-          {kpis.map((k, i) => (
-            <KpiCard key={k.label} {...k} index={i} />
-          ))}
+      <div className="proj-content">
+        <div className="proj-top">
+          <Reveal className="eyebrow">
+            {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
+          </Reveal>
+          <Headline lines={title} style={{ fontSize: "clamp(2.2rem,5vw,4rem)" }} />
+          {location && <Reveal className="loc">◐ {location}</Reveal>}
+        </div>
+        <div className="proj-bottom">
+          <Reveal className="lede" delay={0.05}>
+            {lede}
+          </Reveal>
+          <div className="kpi-grid">
+            {kpis.map((k, i) => (
+              <KpiCard key={k.label} {...k} index={i} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -190,7 +193,7 @@ export default function Story() {
         <Project
           index={3}
           eyebrow="Casa Nuba · Hotelería"
-          image="/projects/casa-nuba.png"
+          image="/projects/casa-nuba-cut.png"
           title={["Casa Nuba."]}
           location="Punta Lobos, Pichilemu"
           lede="Desarrollo turístico boutique Open Light: 18 unidades, inversión de $1.900 MM, orientado a flujos recurrentes y sostenibles en el largo plazo."
@@ -206,7 +209,7 @@ export default function Story() {
         <Project
           index={4}
           eyebrow="Bodeflex Valle Grande · Industrial"
-          image="/projects/bodeflex-hero.png"
+          image="/projects/bodeflex-cut.png"
           title={["Bodeflex", "Valle Grande."]}
           location="Valle Grande, Lampa"
           lede="Bodegaje flexible institucional: 22.080 m² arrendables, unidades modulares desde 200 m², 6–8 m de altura libre y seguridad 24/7."
