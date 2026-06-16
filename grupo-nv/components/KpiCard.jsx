@@ -33,7 +33,7 @@ export default function KpiCard({ label, value, suffix = "", prefix = "", delta,
       <div className="label">{label}</div>
       <div className="value">
         {prefix}
-        {display.toLocaleString(undefined, {
+        {display.toLocaleString("es-CL", {
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals,
         })}

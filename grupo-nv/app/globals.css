@@ -21,7 +21,7 @@ html,
 body {
   background: var(--navy-deep);
   color: var(--white);
-  font-family: var(--font-body), "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-jost), "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -44,7 +44,7 @@ html.lenis body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-jost), Georgia, serif;
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 0.98;
@@ -58,6 +58,7 @@ h3 {
   height: 100vh;
   z-index: 0;
   pointer-events: none;
+  transition: opacity 0.35s linear;
 }
 
 /* ---------- Story scaffolding ---------- */
@@ -83,7 +84,7 @@ h3 {
 }
 
 .eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-jost);
   font-size: 0.74rem;
   letter-spacing: 0.42em;
   text-transform: uppercase;
@@ -144,7 +145,7 @@ h3 {
   color: var(--taupe);
 }
 .kpi .value {
-  font-family: var(--font-display);
+  font-family: var(--font-jost);
   font-weight: 300;
   font-size: clamp(1.6rem, 3vw, 2.4rem);
   margin-top: 6px;
@@ -220,14 +221,14 @@ h3 {
   top: clamp(18px, 3vw, 38px);
   left: clamp(18px, 3vw, 38px);
   z-index: 6;
-  font-family: var(--font-display);
+  font-family: var(--font-jost);
   letter-spacing: 0.04em;
   font-size: 1.1rem;
   mix-blend-mode: difference;
 }
 .brand small {
   display: block;
-  font-family: var(--font-body);
+  font-family: var(--font-jost);
   font-size: 0.58rem;
   letter-spacing: 0.34em;
   text-transform: uppercase;
@@ -258,7 +259,7 @@ h3 {
 .wordmark {
   display: flex;
   gap: 0.5ch;
-  font-family: var(--font-body);
+  font-family: var(--font-jost);
   font-weight: 500;
   letter-spacing: 0.5em;
   font-size: clamp(1.4rem, 3.4vw, 2.6rem);
@@ -277,7 +278,7 @@ h3 {
   opacity: 0.6;
 }
 .lockup .tagline {
-  font-family: var(--font-body);
+  font-family: var(--font-jost);
   font-size: 0.66rem;
   letter-spacing: 0.4em;
   text-transform: uppercase;
@@ -288,11 +289,17 @@ h3 {
 .stats {
   margin-top: 2.6rem;
   display: grid;
-  grid-template-columns: repeat(3, auto);
-  gap: clamp(24px, 5vw, 64px);
+  grid-template-columns: repeat(4, auto);
+  justify-content: center;
+  gap: clamp(20px, 4vw, 52px);
+}
+@media (max-width: 760px) {
+  .stats {
+    grid-template-columns: repeat(2, auto);
+  }
 }
 .stat .n {
-  font-family: var(--font-display);
+  font-family: var(--font-jost);
   font-weight: 300;
   font-size: clamp(2.4rem, 6vw, 4.4rem);
   line-height: 1;
@@ -311,7 +318,7 @@ h3 {
   display: flex;
   gap: 1.2rem;
   flex-wrap: wrap;
-  font-family: var(--font-display);
+  font-family: var(--font-jost);
   font-size: clamp(1.1rem, 2.4vw, 1.7rem);
   color: var(--gray-arch);
 }
@@ -420,6 +427,123 @@ h3 {
   }
   .cta {
     flex-direction: column;
+  }
+}
+
+/* ---------- Original logo on a light plate (legible on navy) ---------- */
+.logo-plate {
+  display: inline-flex;
+  background: var(--white);
+  border-radius: 16px;
+  padding: clamp(20px, 3vw, 34px) clamp(28px, 4vw, 52px);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+.logo-plate img {
+  display: block;
+  width: clamp(180px, 26vw, 300px);
+  height: auto;
+}
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-logo .mark {
+  width: 30px;
+  height: 30px;
+  background: var(--white);
+  border-radius: 7px;
+  padding: 3px;
+  object-fit: contain;
+}
+
+/* ---------- Location + status pills ---------- */
+.loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.nda {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 7px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gray-arch);
+}
+
+/* ---------- Leadership & advisory ---------- */
+.team {
+  width: min(1100px, 94vw);
+  margin: 2.6rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.member {
+  padding: 26px 28px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.member .ph {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1c3a63, #0b2343);
+  border: 1px solid var(--glass-border);
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  color: var(--taupe);
+  letter-spacing: 0.05em;
+}
+.member h3 {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+.member .role {
+  font-size: 0.64rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--taupe);
+  margin: 6px 0 10px;
+}
+.member .bio {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--gray-arch);
+}
+.member .prev {
+  margin-top: 10px;
+  font-size: 0.74rem;
+  color: var(--taupe);
+}
+
+/* ---------- Mini portfolio cards (+Value teaser) ---------- */
+.mini {
+  width: min(1100px, 94vw);
+  margin: 2rem auto 0;
+  padding: 26px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .team {
+    grid-template-columns: 1fr;
   }
 }
 
