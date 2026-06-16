@@ -517,12 +517,12 @@ h3 {
   will-change: transform;
 }
 .proj-bg img {
-  width: min(96%, 1200px);
-  height: 78%;
+  width: min(98%, 1480px);
+  height: 88%;
   object-fit: contain;
   object-position: center;
   display: block;
-  will-change: transform, opacity;
+  will-change: transform, opacity, clip-path, filter;
 }
 .proj-scrim {
   position: absolute;
