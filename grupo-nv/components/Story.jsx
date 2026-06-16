@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useJourney, SECTIONS } from "@/lib/store";
 import KpiCard from "@/components/KpiCard";
 import { Monogram, LogoLockup } from "@/components/Logo";
@@ -32,10 +34,34 @@ function Chapter({ index, eyebrow, className = "", children }) {
   );
 }
 
-/* Project chapter — floating, centered text over the 3D render background. */
-function Project({ index, eyebrow, title, location, lede, kpis }) {
+/* Project chapter — full-bleed cinematic render with parallax + slow zoom,
+   floating text and KPIs on top. */
+function Project({ index, eyebrow, image, title, location, lede, kpis }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  // Parallax drift + a continuous slow zoom as the section travels the viewport.
+  const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.18, 1.08, 1.16]);
+
   return (
-    <section className="chapter proj" data-align="center" id={`ch-${index}`}>
+    <section ref={ref} className="chapter proj" data-align="center" id={`ch-${index}`}>
+      <motion.div className="proj-bg" style={{ y }}>
+        <motion.img
+          // eslint-disable-next-line @next/next/no-img-element
+          src={image}
+          alt=""
+          style={{ scale }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ margin: "-12% 0px" }}
+          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        />
+        <div className="proj-scrim" />
+      </motion.div>
+
       <div className="stage">
         <Reveal className="eyebrow">
           {`${String(index + 1).padStart(2, "0")} — ${eyebrow}`}
@@ -164,6 +190,7 @@ export default function Story() {
         <Project
           index={3}
           eyebrow="Casa Nuba · Hotelería"
+          image="/projects/casa-nuba.png"
           title={["Casa Nuba."]}
           location="Punta Lobos, Pichilemu"
           lede="Desarrollo turístico boutique Open Light: 18 unidades, inversión de $1.900 MM, orientado a flujos recurrentes y sostenibles en el largo plazo."
@@ -179,6 +206,7 @@ export default function Story() {
         <Project
           index={4}
           eyebrow="Bodeflex Valle Grande · Industrial"
+          image="/projects/bodeflex-hero.png"
           title={["Bodeflex", "Valle Grande."]}
           location="Valle Grande, Lampa"
           lede="Bodegaje flexible institucional: 22.080 m² arrendables, unidades modulares desde 200 m², 6–8 m de altura libre y seguridad 24/7."
