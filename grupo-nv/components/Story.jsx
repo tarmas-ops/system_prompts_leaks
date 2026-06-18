@@ -34,7 +34,7 @@ function Chapter({ index, eyebrow, children }) {
 }
 
 /* Business line — logo, bold title, the render (clear of any text), features. */
-function BusinessLine({ index, logo, whiteLogo, subtitle, name, image, description, features, nda }) {
+function BusinessLine({ index, logo, whiteLogo, logoClass = "", subtitle, name, image, description, features, nda }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
@@ -45,7 +45,7 @@ function BusinessLine({ index, logo, whiteLogo, subtitle, name, image, descripti
         <Reveal>
           <span className="line-logo-box">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={`line-logo ${whiteLogo ? "on-white" : ""}`} src={logo} alt={name} />
+            <img className={`line-logo ${whiteLogo ? "on-white" : ""} ${logoClass}`} src={logo} alt={name} />
           </span>
         </Reveal>
         <Reveal className="eyebrow">{`${String(index + 1).padStart(2, "0")} — ${subtitle}`}</Reveal>
@@ -183,14 +183,14 @@ export default function Story() {
           </Reveal>
           <div className="lines-grid">
             {[
-              { logo: "/lines/casanuba.png", name: "Hotelería & Lifestyle" },
+              { logo: "/lines/casanuba.png", name: "Hotelería & Lifestyle", cls: "casa" },
               { logo: "/lines/bodeflex.png", name: "Industrial & Flex Storage" },
               { logo: "/lines/value-white.png", name: "Opportunistic Real Estate", white: true },
             ].map((l, i) => (
               <Reveal className="line-item" key={l.logo} delay={i * 0.1}>
                 <span className="line-logo-box">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className={`line-logo ${l.white ? "on-white" : ""}`} src={l.logo} alt={l.name} />
+                  <img className={`line-logo ${l.white ? "on-white" : ""} ${l.cls || ""}`} src={l.logo} alt={l.name} />
                 </span>
                 <span className="line-name">{l.name}</span>
               </Reveal>
@@ -202,9 +202,10 @@ export default function Story() {
         <BusinessLine
           index={3}
           logo="/lines/casanuba.png"
+          logoClass="casa"
           subtitle="Open Light Hospitality"
           name="Casa Nuba."
-          image="/projects/casa-nuba-cut.png"
+          image="/projects/casa-nuba-cut-t.png"
           description="Desarrollo y operación de activos turísticos orientados a experiencias premium en destinos exclusivos."
           features={["Experiencias únicas", "Arquitectura de alto nivel", "Sostenibilidad y entorno"]}
         />
@@ -215,7 +216,7 @@ export default function Story() {
           logo="/lines/bodeflex.png"
           subtitle="Industrial & Flex Storage"
           name="Bodeflex Valle Grande."
-          image="/projects/bodeflex-cut.png"
+          image="/projects/bodeflex-cut-t.png"
           description="Desarrollo y operación de parques de bodegaje flexible para pymes y empresas en ubicaciones estratégicas."
           features={["Bodegas flexibles", "Oficina integrada", "Seguridad y control 24/7"]}
         />

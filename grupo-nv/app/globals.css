@@ -537,8 +537,8 @@ h3 {
   will-change: transform;
 }
 .line-render {
-  width: min(98vw, 1700px);
-  max-height: 82vh;
+  width: min(100vw, 1700px);
+  max-height: 88vh;
   object-fit: contain;
   display: block;
   will-change: transform, opacity, clip-path, filter;
@@ -559,6 +559,9 @@ h3 {
   height: auto;
   object-fit: contain;
   display: block;
+}
+.line-logo.casa {
+  max-height: clamp(92px, 22.5vw, 130px);
 }
 .line-logo.on-white {
   border-radius: 10px;
